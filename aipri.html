@@ -20,25 +20,45 @@
   <main class="content-wrap">
     <section class="panel">
       <div class="section-title">
-        <h2>파츠 · 코디 · 악곡 사진</h2>
-        <span class="tag">미리 등록하는 사진</span>
+        <h2>파츠</h2>
       </div>
+      <p class="muted">파츠 참고 사진을 모아두는 공간입니다.</p>
+      <div class="empty-state">
+        <span>＋</span>
+        <b>등록된 파츠 사진이 없습니다.</b>
+      </div>
+    </section>
 
-      <p class="muted">참고할 사진을 종류별로 모아두는 공간입니다.</p>
+    <section class="panel">
+      <div class="section-title">
+        <h2>코디</h2>
+      </div>
+      <p class="muted">코디 참고 사진을 모아두는 공간입니다.</p>
+      <div class="empty-state">
+        <span>＋</span>
+        <b>등록된 코디 사진이 없습니다.</b>
+      </div>
+    </section>
 
-      <div class="empty-gallery">
-        <div class="placeholder-tile">
-          <span>＋</span>
-          <b>파츠 사진</b>
-        </div>
-        <div class="placeholder-tile">
-          <span>＋</span>
-          <b>코디 사진</b>
-        </div>
-        <div class="placeholder-tile">
-          <span>＋</span>
-          <b>악곡 사진</b>
-        </div>
+    <section class="panel">
+      <div class="section-title">
+        <h2>악곡</h2>
+      </div>
+      <p class="muted">악곡 참고 사진을 모아두는 공간입니다.</p>
+      <div class="empty-state">
+        <span>＋</span>
+        <b>등록된 악곡 사진이 없습니다.</b>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-title">
+        <h2>QR</h2>
+      </div>
+      <p class="muted">QR 참고 사진을 모아두는 공간입니다.</p>
+      <div class="empty-state">
+        <span>＋</span>
+        <b>등록된 QR 사진이 없습니다.</b>
       </div>
     </section>
 
@@ -62,3 +82,14 @@
       <div id="emptyState" class="empty-state" hidden>
         <span>▧</span>
         <b>아직 추가한 OR 사진이 없습니다.</b>
+        <small>‘사진 추가’를 눌러 작업할 이미지를 선택해 주세요.</small>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-title">
+        <h2>대행 메모</h2>
+      </div>
+
+      <label class="field-label" for="memo">작업 메모 (이 브라우저에 자동 저장)</label>
+      <textarea
