@@ -849,22 +849,26 @@
         if (document.fonts && document.fonts.ready) await document.fonts.ready;
         const canvas = await window.html2canvas(target, {
           backgroundColor: "#ffffff",
-          scale: Math.min(2, window.devicePixelRatio || 1.5),
+          scale: 2,
+          width: 1200,
+          windowWidth: 1200,
           useCORS: true,
           allowTaint: false,
           logging: false,
           scrollX: 0,
-          scrollY: -window.scrollY,
+          scrollY: 0,
           onclone: clonedDocument => {
             const clonedTarget = clonedDocument.querySelector(".parts-page");
-            clonedTarget.querySelectorAll(".parts-actions, .saved-characters, .parts-hint, .outfit-status, #outfitStatus, #songStatus").forEach(element => {
+            clonedTarget.querySelectorAll(".parts-actions, .saved-characters, .parts-hint, .outfit-status, #outfitStatus, #songStatus, .export-actions").forEach(element => {
               element.style.display = "none";
             });
             clonedTarget.querySelectorAll("input[type='file']").forEach(element => { element.style.display = "none"; });
             clonedTarget.style.width = "1200px";
+            clonedTarget.style.minWidth = "1200px";
             clonedTarget.style.maxWidth = "1200px";
             clonedTarget.style.padding = "24px";
             clonedTarget.style.margin = "0";
+            clonedTarget.style.boxSizing = "border-box";
           }
         });
         const name = (document.getElementById("characterName").value.trim() || "아이프리").replace(/[\\/:*?"<>|]/g, "_");
