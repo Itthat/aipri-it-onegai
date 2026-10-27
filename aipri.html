@@ -92,6 +92,8 @@
     .parts-option { display: flex; align-items: center; justify-content: center; aspect-ratio: 1 / 1; min-width: 0; padding: 6px; border: 1px solid #d5ebe5; border-radius: 10px; background: #f0fbf7; cursor: pointer; }
     .parts-option:hover { border-color: #359e8e; background: #e1f7f0; }
     .parts-option img { width: 100%; height: 100%; object-fit: contain; }
+    .parts-option-special { padding: 12px; color: #326e64; font: inherit; font-size: 14px; font-weight: 700; }
+    .parts-option-special:hover { background: #dff4ec; }
     .parts-loading { grid-column: 1 / -1; padding: 28px 8px; color: #64877f; text-align: center; }
     @media (max-width: 600px) {
       .parts-page { padding-right: 4px; padding-left: 4px; }
@@ -289,12 +291,12 @@
             button.setAttribute("aria-label", "QR 이미지 업로드");
             button.addEventListener("click", () => document.getElementById("qrUpload").click());
           } else {
-            if (selected) {
+            if (selected && selected.image) {
               const image = document.createElement("img");
               image.src = selected.image;
               image.alt = "";
               button.appendChild(image);
-            } else {
+            } else if (!selected || !selected.blank) {
               const plus = document.createElement("span");
               plus.textContent = "＋";
               button.appendChild(plus);
@@ -359,10 +361,6 @@
       );
 
       optionsBox.innerHTML = "";
-      if (!matching.length) {
-        optionsBox.innerHTML = '<div class="parts-loading">이 종류의 파츠를 찾지 못했습니다.</div>';
-        return;
-      }
 
       matching.forEach(item => {
         const button = document.createElement("button");
@@ -382,6 +380,41 @@
         });
         optionsBox.appendChild(button);
       });
+
+      // 각 파츠 목록 마지막에 빈칸과 선택 취소 옵션을 고정으로 표시합니다.
+      const blankButton = document.createElement("button");
+      blankButton.type = "button";
+      blankButton.className = "parts-option parts-option-special";
+      blankButton.textContent = "빈칸";
+      blankButton.setAttribute("aria-label", "빈칸 선택");
+      blankButton.addEventListener("click", () => {
+        selections[category.key] = { blank: true };
+        renderTable();
+        saveState();
+        closePicker();
+      });
+      optionsBox.appendChild(blankButton);
+
+      const cancelSelectionButton = document.createElement("button");
+      cancelSelectionButton.type = "button";
+      cancelSelectionButton.className = "parts-option parts-option-special";
+      cancelSelectionButton.textContent = "선택 취소";
+      cancelSelectionButton.setAttribute("aria-label", "현재 파츠 선택 취소");
+      cancelSelectionButton.addEventListener("click", () => {
+        delete selections[category.key];
+        renderTable();
+        saveState();
+        closePicker();
+      });
+      optionsBox.appendChild(cancelSelectionButton);
+
+      if (!matching.length) {
+        // 특수 선택지는 파츠 이미지가 없을 때도 표시됩니다.
+        const message = document.createElement("div");
+        message.className = "parts-loading";
+        message.textContent = "이 종류의 파츠를 찾지 못했습니다.";
+        optionsBox.prepend(message);
+      }
     }
 
     function closePicker() {
