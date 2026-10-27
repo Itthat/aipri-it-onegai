@@ -42,6 +42,18 @@
     .outfit-card-name { display: block; margin-top: 6px; font-size: 12px; overflow-wrap: anywhere; }
     .outfit-status { margin: 0 0 12px; color: #64877f; font-size: 12px; text-align: center; }
     .qr-preview-img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .music-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 0; padding: 12px; border: 1px dashed #8bcabd; border-radius: 10px; background: #f0fbf7; }
+    .music-preview-image { display: block; width: min(100%, 180px); max-height: 210px; aspect-ratio: 3 / 4; object-fit: contain; border-radius: 7px; background: #fff; }
+    .music-preview-image[hidden] { display: none; }
+    .music-preview-name { max-width: 100%; color: #285650; font-size: 12px; text-align: center; overflow-wrap: anywhere; }
+    .friend-card-preview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 10px; border: 1px dashed #8bcabd; border-radius: 10px; background: #f0fbf7; color: #398579; }
+    .friend-card-slot { display: flex; min-width: 0; min-height: 170px; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 8px; border: 1px solid #cce7df; border-radius: 8px; background: #fff; text-align: center; }
+    .friend-card-slot img { display: block; width: 100%; max-height: 180px; object-fit: contain; }
+    .friend-card-slot-empty { color: #64877f; font-size: 12px; }
+    .friend-card-slot-button { max-width: 100%; padding: 6px 8px; border: 1px solid #b8dfd6; border-radius: 7px; background: #f0fbf7; color: #285650; font: inherit; font-size: 12px; cursor: pointer; }
+    .friend-card-remove { padding: 4px 8px; border: 0; border-radius: 6px; background: #e0f4ee; color: #326e64; font: inherit; font-size: 11px; cursor: pointer; }
+    @media (max-width: 420px) { .friend-card-preview { gap: 5px; padding: 5px; } .friend-card-slot { padding: 5px; } .friend-card-slot-button { font-size: 10px; } }
+    .music-subtitle { margin: 12px 0 8px; color: #285650; font-size: 15px; text-align: center; }
     @media (max-width: 600px) { .work-panels { grid-template-columns: 1fr; gap: 12px; } .work-panel { padding: 14px; } }
     .parts-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
     .saved-characters { margin-top: 18px; padding: 16px; border: 1px solid #cce7df; border-radius: 12px; background: #f8fffc; }
@@ -118,7 +130,6 @@
     <div class="work-panels">
       <section class="work-panel">
         <h2>의상 선택</h2>
-        <p class="work-panel-description">선택할 의상과 코디를 정리하는 공간입니다.</p>
         <div class="outfit-preview" id="outfitPreview" aria-live="polite">
           <span id="outfitPreviewEmpty">코디를 선택해 주세요.</span>
           <img id="outfitPreviewImage" alt="선택한 코디" hidden>
@@ -132,19 +143,30 @@
       </section>
       <section class="work-panel">
         <h2>악곡 및 프렌드카드</h2>
-        <p class="work-panel-description">악곡과 프렌드카드 관련 항목을 정리하는 공간입니다.</p>
-        <div class="work-placeholder">
-          <span class="work-placeholder-symbol">＋</span>
-          <b>악곡 · 프렌드카드 영역</b>
-          <small>악곡과 프렌드카드 선택 기능은 추후 추가 예정</small>
+        <h3 class="music-subtitle">악곡</h3>
+        <div class="music-card" id="songPreview" aria-live="polite">
+          <span id="songPreviewEmpty">악곡을 선택해 주세요.</span>
+          <img id="songPreviewImage" class="music-preview-image" alt="선택한 악곡" hidden>
+          <span id="songPreviewName" class="music-preview-name" hidden></span>
+        </div>
+        <p id="songStatus" class="outfit-status">악곡 목록을 불러오는 중입니다…</p>
+        <div class="parts-actions">
+          <button class="parts-button" id="openSongPicker" type="button">악곡 선택</button>
+          <button class="parts-button" id="clearSong" type="button">악곡 선택 해제</button>
+        </div>
+        <h3 class="music-subtitle">프렌드카드</h3>
+        <div class="friend-card-preview" id="friendCardPreview" aria-live="polite"></div>
+        <div class="parts-actions">
+          <button class="parts-button" id="clearFriendCard" type="button">전체 삭제</button>
         </div>
       </section>
     </div>
     <input id="qrUpload" type="file" accept="image/*" hidden>
+  <input id="friendCardUpload" type="file" accept="image/*" hidden>
 
     <section class="parts-panel">
       <h2>기타</h2>
-      <textarea id="memo" rows="4" placeholder="요청 사항 등을 적어 두세요." aria-label="기타 요청 사항"></textarea>
+      <textarea id="memo" rows="4" placeholder="추가 요청 사항을 적어주세요." aria-label="기타 요청 사항"></textarea>
     </section>
   </main>
 
@@ -172,6 +194,17 @@
       </div>
       <p id="outfitModalStatus" class="outfit-status">의상 목록을 불러오는 중입니다…</p>
       <div id="outfitGallery" class="outfit-gallery" aria-label="의상 목록"></div>
+    </div>
+  </div>
+
+  <div class="parts-modal" id="songModal" role="dialog" aria-modal="true" aria-labelledby="songModalTitle">
+    <div class="parts-modal-box">
+      <div class="parts-modal-top">
+        <h2 id="songModalTitle">악곡 선택</h2>
+        <button type="button" class="parts-close" id="closeSongModal" aria-label="닫기">×</button>
+      </div>
+      <p id="songModalStatus" class="outfit-status">악곡 목록을 불러오는 중입니다…</p>
+      <div id="songGallery" class="outfit-gallery" aria-label="악곡 목록"></div>
     </div>
   </div>
 
@@ -434,6 +467,175 @@
       if (event.target === outfitModal) outfitModal.classList.remove("open");
     });
 
+    // 아이프리버스 악곡 목록은 images/songs-verse 폴더에서 불러옵니다.
+    const SONGS_API = "https://api.github.com/repos/Itthat/aipri-it-onegai/contents/images/songs-verse";
+    const songGallery = document.getElementById("songGallery");
+    const songStatus = document.getElementById("songStatus");
+    const songModalStatus = document.getElementById("songModalStatus");
+    const songModal = document.getElementById("songModal");
+    const songPreviewImage = document.getElementById("songPreviewImage");
+    const songPreviewName = document.getElementById("songPreviewName");
+    const songPreviewEmpty = document.getElementById("songPreviewEmpty");
+    const friendCardPreview = document.getElementById("friendCardPreview");
+    let friendCardTargetSlot = 0;
+    let songCatalog = [];
+
+    function songDisplayName(filename) {
+      return filename.replace(/\.(png|jpe?g|webp|gif)$/i, "").replace(/_/g, " ");
+    }
+
+    function renderSong() {
+      const selected = selections.song;
+      songPreviewEmpty.hidden = !!selected;
+      songPreviewImage.hidden = !selected;
+      songPreviewName.hidden = !selected;
+      if (selected) {
+        songPreviewImage.src = selected.image;
+        songPreviewName.textContent = selected.name;
+      } else {
+        songPreviewImage.removeAttribute("src");
+        songPreviewName.textContent = "";
+      }
+      songGallery.innerHTML = "";
+      songCatalog.forEach(song => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "outfit-card" + (selected && selected.image === song.image ? " selected" : "");
+        button.setAttribute("aria-pressed", selected && selected.image === song.image ? "true" : "false");
+        const image = document.createElement("img");
+        image.loading = "lazy";
+        image.src = song.image;
+        image.alt = "";
+        const name = document.createElement("span");
+        name.className = "outfit-card-name";
+        name.textContent = song.name;
+        button.append(image, name);
+        button.addEventListener("click", () => {
+          selections.song = { image: song.image, name: song.name };
+          renderSong();
+          saveState();
+          songModal.classList.remove("open");
+        });
+        songGallery.appendChild(button);
+      });
+    }
+
+    async function loadSongs() {
+      const loadingText = "악곡 목록을 불러오는 중입니다…";
+      songStatus.textContent = loadingText;
+      songModalStatus.textContent = loadingText;
+      try {
+        const response = await fetch(SONGS_API);
+        if (!response.ok) throw new Error("악곡 목록 요청 실패");
+        const files = await response.json();
+        songCatalog = files.filter(file => file.type === "file" && /\.(png|jpe?g|webp|gif)$/i.test(file.name))
+          .map(file => ({ name: songDisplayName(file.name), image: file.download_url }))
+          .sort((a, b) => a.name.localeCompare(b.name, "ko"));
+        if (!songCatalog.length) {
+          const message = "악곡 이미지가 없습니다. images/songs-verse 폴더를 확인해 주세요.";
+          songStatus.textContent = message;
+          songModalStatus.textContent = message;
+          return;
+        }
+        songStatus.textContent = "악곡 선택을 눌러 이미지를 보고 고를 수 있습니다.";
+        songModalStatus.textContent = "이미지를 누르면 악곡을 선택할 수 있습니다.";
+        renderSong();
+      } catch (error) {
+        const message = "악곡 목록을 불러오지 못했습니다. 폴더 이름과 새로고침을 확인해 주세요.";
+        songStatus.textContent = message;
+        songModalStatus.textContent = message;
+      }
+    }
+
+    document.getElementById("openSongPicker").addEventListener("click", () => {
+      songModal.classList.add("open");
+      renderSong();
+    });
+    document.getElementById("closeSongModal").addEventListener("click", () => songModal.classList.remove("open"));
+    songModal.addEventListener("click", event => { if (event.target === songModal) songModal.classList.remove("open"); });
+    document.getElementById("clearSong").addEventListener("click", () => {
+      delete selections.song;
+      renderSong();
+      saveState();
+    });
+
+    function normalizeFriendCards() {
+      // 이전 버전에서 저장한 단일 프렌드카드도 유지합니다.
+      if (!Array.isArray(selections.friendCards)) {
+        selections.friendCards = selections.friendCard && selections.friendCard.image ? [selections.friendCard] : [];
+      }
+      delete selections.friendCard;
+      selections.friendCards = selections.friendCards.slice(0, 3);
+    }
+
+    function renderFriendCard() {
+      normalizeFriendCards();
+      friendCardPreview.innerHTML = "";
+      for (let index = 0; index < 3; index++) {
+        const item = document.createElement("div");
+        item.className = "friend-card-slot";
+        const card = selections.friendCards[index];
+        if (card && card.image) {
+          const image = document.createElement("img");
+          image.src = card.image;
+          image.alt = `프렌드카드 QR ${index + 1}`;
+          item.appendChild(image);
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "friend-card-remove";
+          remove.textContent = "이 이미지 삭제";
+          remove.addEventListener("click", () => {
+            selections.friendCards[index] = null;
+            // 빈 칸을 유지해 사용자가 지정한 슬롯에 이미지를 넣을 수 있게 합니다.
+            renderFriendCard();
+            saveState();
+          });
+          item.appendChild(remove);
+        } else {
+          const empty = document.createElement("span");
+          empty.className = "friend-card-slot-empty";
+          empty.textContent = `프렌드카드 ${index + 1}`;
+          item.appendChild(empty);
+        }
+        const upload = document.createElement("button");
+        upload.type = "button";
+        upload.className = "friend-card-slot-button";
+        upload.textContent = card && card.image ? "이미지 변경" : "이미지 올리기";
+        upload.addEventListener("click", () => {
+          friendCardTargetSlot = index;
+          document.getElementById("friendCardUpload").click();
+        });
+        item.appendChild(upload);
+        friendCardPreview.appendChild(item);
+      }
+    }
+    document.getElementById("clearFriendCard").addEventListener("click", () => {
+      selections.friendCards = [];
+      renderFriendCard();
+      saveState();
+    });
+    document.getElementById("friendCardUpload").addEventListener("change", async event => {
+      const file = event.target.files && event.target.files[0];
+      event.target.value = "";
+      if (!file) return;
+      normalizeFriendCards();
+      const readFile = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve({ image: reader.result });
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      try {
+        const card = await readFile(file);
+        selections.friendCards[friendCardTargetSlot] = card;
+        selections.friendCards = selections.friendCards.slice(0, 3);
+        renderFriendCard();
+        saveState();
+      } catch (error) {
+        await siteAlert("이미지를 불러오지 못했습니다. 다른 이미지를 선택해 주세요.");
+      }
+    });
+
     const DRAFT_KEY = "aipriBusPartsDraft";
     const LEGACY_KEY = "aipriBusParts";
     const SAVED_CHARACTERS_KEY = "aipriBusSavedCharacters";
@@ -565,7 +767,11 @@
       if (data && data.selections && typeof data.selections === "object") {
         Object.assign(selections, data.selections);
       }
+      normalizeFriendCards();
       renderTable();
+      renderOutfits();
+      renderSong();
+      renderFriendCard();
       saveState();
     }
 
@@ -645,6 +851,7 @@
     restoreState();
     loadCatalog();
     loadOutfits();
+    loadSongs();
   </script>
 </body>
 </html>
