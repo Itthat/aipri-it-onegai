@@ -34,6 +34,11 @@
     .qr-preview-img { display: block; width: 100%; height: 100%; object-fit: contain; }
     @media (max-width: 600px) { .work-panels { grid-template-columns: 1fr; gap: 12px; } .work-panel { padding: 14px; } }
     .parts-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
+    .saved-characters { margin-top: 18px; padding: 16px; border: 1px solid #cce7df; border-radius: 12px; background: #f8fffc; }
+    .saved-characters h2 { margin: 0 0 10px; color: #285650; font-size: 18px; text-align: center; }
+    .saved-character-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .saved-character-select { flex: 1 1 220px; min-width: 0; max-width: 100%; padding: 9px; border: 1px solid #b8dfd6; border-radius: 8px; background: #fff; color: #285650; font: inherit; }
+    .saved-character-status { margin: 10px 0 0; color: #64877f; font-size: 12px; text-align: center; }
     .parts-modal { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; padding: 16px; background: #183b3699; }
     .parts-modal.open { display: flex; }
     .parts-modal-box { display: flex; flex-direction: column; width: min(100%, 760px); max-height: 85vh; padding: 18px; border-radius: 16px; background: #fafffd; box-shadow: 0 10px 40px #0002; }
@@ -74,9 +79,21 @@
     </div>
     <p class="parts-hint">칸을 누르면 파츠를 선택할 수 있습니다. 애니메이션 캐릭터 헤어는 앞머리 사용이 불가능합니다.</p>
     <div class="parts-actions">
-      <button class="parts-button" id="saveParts" type="button">선택 내용 저장</button>
+      <button class="parts-button" id="saveParts" type="button">캐릭터 저장</button>
       <button class="parts-button" id="resetParts" type="button">선택 초기화</button>
     </div>
+
+    <section class="saved-characters" aria-labelledby="savedCharactersTitle">
+      <h2 id="savedCharactersTitle">저장된 캐릭터</h2>
+      <div class="saved-character-controls">
+        <select id="savedCharacterList" class="saved-character-select" aria-label="불러올 캐릭터 선택">
+          <option value="">저장된 캐릭터가 없습니다.</option>
+        </select>
+        <button class="parts-button" id="loadCharacter" type="button">불러오기</button>
+        <button class="parts-button" id="deleteCharacter" type="button">삭제</button>
+      </div>
+      <p id="savedCharacterStatus" class="saved-character-status" aria-live="polite">저장한 캐릭터는 이 브라우저에 보관됩니다.</p>
+    </section>
 
     <div class="work-panels">
       <section class="work-panel">
@@ -287,29 +304,84 @@
       activeCategory = null;
     }
 
+    const DRAFT_KEY = "aipriBusPartsDraft";
+    const LEGACY_KEY = "aipriBusParts";
+    const SAVED_CHARACTERS_KEY = "aipriBusSavedCharacters";
+    const savedCharacterList = document.getElementById("savedCharacterList");
+    const savedCharacterStatus = document.getElementById("savedCharacterStatus");
+
+    function getSavedCharacters() {
+      try {
+        const data = JSON.parse(localStorage.getItem(SAVED_CHARACTERS_KEY) || "{}");
+        return data && typeof data === "object" && !Array.isArray(data) ? data : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function refreshSavedCharacterList(selectName = "") {
+      const saved = getSavedCharacters();
+      const names = Object.keys(saved).sort((a, b) => a.localeCompare(b, "ko"));
+      savedCharacterList.innerHTML = "";
+      if (!names.length) {
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "저장된 캐릭터가 없습니다.";
+        savedCharacterList.appendChild(option);
+        savedCharacterList.disabled = true;
+        document.getElementById("loadCharacter").disabled = true;
+        document.getElementById("deleteCharacter").disabled = true;
+        return;
+      }
+      savedCharacterList.disabled = false;
+      document.getElementById("loadCharacter").disabled = false;
+      document.getElementById("deleteCharacter").disabled = false;
+      names.forEach(name => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        savedCharacterList.appendChild(option);
+      });
+      if (names.includes(selectName)) savedCharacterList.value = selectName;
+    }
+
     function saveState() {
       const data = {
         name: document.getElementById("characterName").value,
-        selections,
+        selections: { ...selections }
       };
       try {
-        localStorage.setItem("aipriBusParts", JSON.stringify(data));
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
       } catch (error) {
-        alert("저장 공간이 부족합니다. QR 이미지 크기를 줄인 뒤 다시 시도해 주세요.");
+        savedCharacterStatus.textContent = "브라우저 저장 공간이 부족합니다. QR 이미지 크기를 줄여 주세요.";
       }
+    }
+
+    function applyCharacterData(data) {
+      document.getElementById("characterName").value = data && data.name ? data.name : "";
+      Object.keys(selections).forEach(key => delete selections[key]);
+      if (data && data.selections && typeof data.selections === "object") {
+        Object.assign(selections, data.selections);
+      }
+      renderTable();
+      saveState();
     }
 
     function restoreState() {
       try {
-        const data = JSON.parse(localStorage.getItem("aipriBusParts") || "{}");
-        document.getElementById("characterName").value = data.name || "";
-        if (data.selections && typeof data.selections === "object") {
-          Object.assign(selections, data.selections);
+        let data = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null");
+        if (!data) {
+          // 이전 버전에서 저장했던 현재 작업이 있으면 임시 작업으로 이어받습니다.
+          data = JSON.parse(localStorage.getItem(LEGACY_KEY) || "null");
+          if (data) localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
         }
+        if (data) applyCharacterData(data);
+        else renderTable();
       } catch (error) {
         console.warn("저장된 파츠 정보를 불러오지 못했습니다.", error);
+        renderTable();
       }
-      renderTable();
+      refreshSavedCharacterList();
     }
 
     document.getElementById("closeModal").addEventListener("click", closePicker);
@@ -333,15 +405,57 @@
       event.target.value = "";
     });
     document.getElementById("saveParts").addEventListener("click", () => {
-      saveState();
-      alert("선택 내용이 이 브라우저에 저장되었습니다.");
+      const name = document.getElementById("characterName").value.trim();
+      if (!name) {
+        alert("먼저 캐릭터 이름을 입력해 주세요.");
+        document.getElementById("characterName").focus();
+        return;
+      }
+      const saved = getSavedCharacters();
+      const alreadyExists = Object.prototype.hasOwnProperty.call(saved, name);
+      if (alreadyExists && !confirm("같은 이름의 캐릭터가 이미 있습니다. 기존 저장 내용을 덮어쓸까요?")) return;
+      saved[name] = { name, selections: { ...selections }, updatedAt: new Date().toISOString() };
+      try {
+        localStorage.setItem(SAVED_CHARACTERS_KEY, JSON.stringify(saved));
+        saveState();
+        refreshSavedCharacterList(name);
+        savedCharacterStatus.textContent = `‘${name}’ 캐릭터를 저장했습니다. 이 브라우저에서 불러올 수 있습니다.`;
+      } catch (error) {
+        alert("저장 공간이 부족해 캐릭터를 저장하지 못했습니다. QR 이미지 크기를 줄여 주세요.");
+      }
     });
+
+    document.getElementById("loadCharacter").addEventListener("click", () => {
+      const name = savedCharacterList.value;
+      const saved = getSavedCharacters();
+      if (!name || !saved[name]) return;
+      if (!confirm("현재 작업 중인 내용 대신 선택한 캐릭터를 불러올까요? 저장하지 않은 변경 사항은 목록에 저장되지 않습니다.")) return;
+      applyCharacterData(saved[name]);
+      savedCharacterStatus.textContent = `‘${name}’ 캐릭터를 불러왔습니다.`;
+    });
+
+    document.getElementById("deleteCharacter").addEventListener("click", () => {
+      const name = savedCharacterList.value;
+      const saved = getSavedCharacters();
+      if (!name || !saved[name]) return;
+      if (!confirm(`저장된 ‘${name}’ 캐릭터를 삭제할까요?`)) return;
+      delete saved[name];
+      try {
+        localStorage.setItem(SAVED_CHARACTERS_KEY, JSON.stringify(saved));
+        refreshSavedCharacterList();
+        savedCharacterStatus.textContent = `‘${name}’ 캐릭터를 삭제했습니다.`;
+      } catch (error) {
+        alert("캐릭터 목록을 업데이트하지 못했습니다.");
+      }
+    });
+
     document.getElementById("resetParts").addEventListener("click", () => {
-      if (!confirm("선택한 파츠와 QR 이미지를 초기화할까요?")) return;
+      if (!confirm("현재 편집 중인 파츠와 QR 이미지를 초기화할까요? 저장된 캐릭터 목록은 삭제되지 않습니다.")) return;
       Object.keys(selections).forEach(key => delete selections[key]);
-      localStorage.removeItem("aipriBusParts");
       document.getElementById("characterName").value = "";
       renderTable();
+      saveState();
+      savedCharacterStatus.textContent = "현재 편집 중인 작업을 초기화했습니다. 저장된 캐릭터는 유지됩니다.";
     });
 
 
