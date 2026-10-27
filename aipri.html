@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>아이프리 대행 | 버스</title>
   <link rel="stylesheet" href="style.css?v=5">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <style>
     .parts-page { width: min(100%, 1200px); margin: 0 auto; padding: 20px 10px 40px; color: #285650; box-sizing: border-box; }
     .parts-name { width: 100%; box-sizing: border-box; margin-bottom: 18px; padding: 12px 14px; border: 1px solid #b8dfd6; border-radius: 10px; background: #fff; color: #285650; font: inherit; }
@@ -56,6 +57,9 @@
     .music-subtitle { margin: 12px 0 8px; color: #285650; font-size: 15px; text-align: center; }
     @media (max-width: 600px) { .work-panels { grid-template-columns: 1fr; gap: 12px; } .work-panel { padding: 14px; } }
     .parts-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
+    .export-actions { display: flex; justify-content: center; margin-top: 16px; }
+    .export-button { display: inline-block; max-width: 100%; box-sizing: border-box; padding: 9px 15px; border: 1px solid #8bcabd; border-radius: 8px; background: #285650; color: #fff; font: inherit; cursor: pointer; }
+    .export-button:disabled { opacity: .65; cursor: wait; }
     .saved-characters { margin-top: 18px; padding: 16px; border: 1px solid #cce7df; border-radius: 12px; background: #f8fffc; }
     .saved-characters h2 { margin: 0 0 10px; color: #285650; font-size: 18px; text-align: center; }
     .saved-character-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
@@ -168,6 +172,9 @@
       <h2>기타</h2>
       <textarea id="memo" rows="4" placeholder="추가 요청 사항을 적어주세요." aria-label="기타 요청 사항"></textarea>
     </section>
+    <div class="export-actions">
+      <button class="export-button" id="exportPageImage" type="button">이미지로 내보내기</button>
+    </div>
   </main>
 
   <footer class="site-footer">
@@ -791,6 +798,52 @@
       }
       refreshSavedCharacterList();
     }
+
+    document.getElementById("exportPageImage").addEventListener("click", async () => {
+      const button = document.getElementById("exportPageImage");
+      if (typeof window.html2canvas !== "function") {
+        await siteAlert("이미지 내보내기 기능을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.", "내보내기 실패");
+        return;
+      }
+      const target = document.querySelector(".parts-page");
+      const oldLabel = button.textContent;
+      button.disabled = true;
+      button.textContent = "이미지 만드는 중…";
+      try {
+        if (document.fonts && document.fonts.ready) await document.fonts.ready;
+        const canvas = await window.html2canvas(target, {
+          backgroundColor: "#ffffff",
+          scale: Math.min(2, window.devicePixelRatio || 1.5),
+          useCORS: true,
+          allowTaint: false,
+          logging: false,
+          scrollX: 0,
+          scrollY: -window.scrollY,
+          onclone: clonedDocument => {
+            const clonedTarget = clonedDocument.querySelector(".parts-page");
+            clonedTarget.querySelectorAll(".parts-actions, .saved-characters, .parts-hint, .outfit-status, #outfitStatus, #songStatus").forEach(element => {
+              element.style.display = "none";
+            });
+            clonedTarget.querySelectorAll("input[type='file']").forEach(element => element.style.display = "none");
+            clonedTarget.style.width = "1200px";
+            clonedTarget.style.maxWidth = "1200px";
+            clonedTarget.style.padding = "24px";
+            clonedTarget.style.margin = "0";
+          }
+        });
+        const name = (document.getElementById("characterName").value.trim() || "아이프리").replace(/[\\/:*?"<>|]/g, "_");
+        const link = document.createElement("a");
+        link.download = name + ".png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      } catch (error) {
+        console.error("이미지 내보내기에 실패했습니다.", error);
+        await siteAlert("이미지를 만들지 못했습니다. 이미지가 모두 표시된 뒤 다시 시도해 주세요.", "내보내기 실패");
+      } finally {
+        button.disabled = false;
+        button.textContent = oldLabel;
+      }
+    });
 
     document.getElementById("closeModal").addEventListener("click", closePicker);
     modal.addEventListener("click", event => {
