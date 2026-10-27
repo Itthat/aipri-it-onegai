@@ -13,10 +13,10 @@
     .parts-table { width: 100%; border-collapse: separate; border-spacing: 3px; table-layout: fixed; }
     .parts-table td { width: 14.2857%; min-width: 0; box-sizing: border-box; padding: 4px; border: 1px solid #d5ebe5; border-radius: 7px; text-align: center; vertical-align: top; background: #f8fffc; }
     .part-label { display: block; min-height: 2.5em; margin-bottom: 4px; color: #285650; font-size: clamp(8px, 1vw, 12px); font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
-    .part-pick { display: flex; width: 100%; aspect-ratio: 1 / 1; align-items: center; justify-content: center; box-sizing: border-box; padding: 2px; overflow: hidden; border: 1px dashed #8bcabd; border-radius: 6px; background: #f0fbf7; color: #398579; cursor: pointer; }
+    .part-pick { display: flex; width: 100%; aspect-ratio: 1 / 1; align-items: center; justify-content: center; box-sizing: border-box; padding: 2px; overflow: hidden; border: 1px solid #8bcabd; border-radius: 6px; background: #f0fbf7; color: #398579; cursor: pointer; }
     .part-pick:hover { border-color: #359e8e; background: #e1f7f0; }
-    .part-pick img { display: block; width: 100%; height: 100%; box-sizing: border-box; object-fit: contain; border: 1px solid #cce7df; border-radius: 4px; }
-    .part-pick-blank { background: transparent; border-color: transparent; }
+    .part-pick img { display: block; width: 100%; height: 100%; box-sizing: border-box; object-fit: contain; border: 0; border-radius: 4px; }
+    .part-pick-blank { background: #f0fbf7; border-color: #8bcabd; }
     .part-pick-blank:hover { background: #e1f7f0; border-color: #359e8e; }
     .part-pick span { font-size: clamp(14px, 2vw, 24px); }
     .part-clear { display: block; max-width: 100%; margin: 4px auto 0; padding: 3px 5px; border: 0; border-radius: 5px; background: #e0f4ee; color: #326e64; cursor: pointer; font-size: 10px; }
@@ -93,8 +93,8 @@
     .parts-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 9px; overflow-y: auto; padding: 2px; }
     .parts-option { display: flex; align-items: center; justify-content: center; aspect-ratio: 1 / 1; min-width: 0; padding: 6px; border: 1px solid #d5ebe5; border-radius: 10px; background: #f0fbf7; cursor: pointer; }
     .parts-option:hover { border-color: #359e8e; background: #e1f7f0; }
-    .blank-option { background: #ffffff; }
-    .blank-option:hover { background: #ffffff; border-color: #359e8e; }
+    .blank-option { background: #f0fbf7; }
+    .blank-option:hover { background: #e1f7f0; border-color: #359e8e; }
     .parts-option img { width: 100%; height: 100%; object-fit: contain; }
     .parts-loading { grid-column: 1 / -1; padding: 28px 8px; color: #64877f; text-align: center; }
     @media (max-width: 600px) {
