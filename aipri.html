@@ -31,6 +31,14 @@
     .work-placeholder { display: flex; min-height: 190px; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 16px; border: 1px dashed #8bcabd; border-radius: 10px; background: #f0fbf7; color: #398579; text-align: center; }
     .work-placeholder-symbol { font-size: 32px; line-height: 1; }
     .work-placeholder small { color: #64877f; }
+    .outfit-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; }
+    .outfit-card { min-width: 0; padding: 7px; border: 1px solid #cce7df; border-radius: 10px; background: #fff; color: #285650; font: inherit; cursor: pointer; text-align: center; }
+    .outfit-card:hover { border-color: #359e8e; background: #f0fbf7; }
+    .outfit-card.selected { border: 2px solid #359e8e; background: #e1f7f0; }
+    .outfit-card img { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: contain; border-radius: 6px; background: #f8fffc; }
+    .outfit-card-name { display: block; margin-top: 6px; font-size: 12px; overflow-wrap: anywhere; }
+    .outfit-status { margin: 0 0 12px; color: #64877f; font-size: 12px; text-align: center; }
+    .outfit-selected-name { margin: 12px 0 0; color: #285650; font-size: 13px; text-align: center; }
     .qr-preview-img { display: block; width: 100%; height: 100%; object-fit: contain; }
     @media (max-width: 600px) { .work-panels { grid-template-columns: 1fr; gap: 12px; } .work-panel { padding: 14px; } }
     .parts-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
@@ -109,10 +117,11 @@
       <section class="work-panel">
         <h2>의상 선택</h2>
         <p class="work-panel-description">선택할 의상과 코디를 정리하는 공간입니다.</p>
-        <div class="work-placeholder">
-          <span class="work-placeholder-symbol">＋</span>
-          <b>의상 선택 영역</b>
-          <small>의상 목록과 선택 기능은 추후 추가 예정</small>
+        <p id="outfitStatus" class="outfit-status">의상 목록을 불러오는 중입니다…</p>
+        <div id="outfitGallery" class="outfit-gallery" aria-label="의상 목록"></div>
+        <p id="outfitSelectedName" class="outfit-selected-name">선택한 코디: 없음</p>
+        <div class="parts-actions">
+          <button class="parts-button" id="clearOutfit" type="button">의상 선택 해제</button>
         </div>
       </section>
       <section class="work-panel">
@@ -127,11 +136,6 @@
     </div>
     <input id="qrUpload" type="file" accept="image/*" hidden>
 
-    <section class="parts-panel">
-      <h2>기타</h2>
-      <label class="field-label" for="memo">작업 메모 (이 브라우저에 자동 저장)</label>
-      <textarea id="memo" rows="4" placeholder="요청 사항 등을 적어 두세요."></textarea>
-    </section>
   </main>
 
   <footer class="site-footer">
@@ -178,8 +182,10 @@
     ];
 
     const PARTS_API = "https://api.github.com/repos/Itthat/aipri-mychara/contents/images/parts";
+    const OUTFITS_API = "https://api.github.com/repos/Itthat/aipri-it-onegai/contents/images/outfits";
     const selections = {};
     let catalog = [];
+    let outfitCatalog = [];
     let activeCategory = null;
 
     const tableBody = document.getElementById("partsTableBody");
@@ -320,6 +326,62 @@
     function closePicker() {
       modal.classList.remove("open");
       activeCategory = null;
+    }
+
+    const outfitGallery = document.getElementById("outfitGallery");
+    const outfitStatus = document.getElementById("outfitStatus");
+    const outfitSelectedName = document.getElementById("outfitSelectedName");
+
+    function outfitDisplayName(filename) {
+      return filename.replace(/\.(png|jpe?g|webp|gif)$/i, "").replace(/_/g, " ");
+    }
+
+    function renderOutfits() {
+      outfitGallery.innerHTML = "";
+      const selected = selections.outfit;
+      outfitSelectedName.textContent = "선택한 코디: " + (selected ? selected.name : "없음");
+      if (!outfitCatalog.length) return;
+      outfitCatalog.forEach(outfit => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "outfit-card" + (selected && selected.image === outfit.image ? " selected" : "");
+        button.setAttribute("aria-pressed", selected && selected.image === outfit.image ? "true" : "false");
+        const image = document.createElement("img");
+        image.loading = "lazy";
+        image.src = outfit.image;
+        image.alt = outfit.name;
+        const name = document.createElement("span");
+        name.className = "outfit-card-name";
+        name.textContent = outfit.name;
+        button.append(image, name);
+        button.addEventListener("click", () => {
+          selections.outfit = { image: outfit.image, name: outfit.name };
+          renderOutfits();
+          saveState();
+        });
+        outfitGallery.appendChild(button);
+      });
+    }
+
+    async function loadOutfits() {
+      outfitStatus.textContent = "의상 목록을 불러오는 중입니다…";
+      try {
+        const response = await fetch(OUTFITS_API);
+        if (!response.ok) throw new Error("의상 목록 요청 실패");
+        const files = await response.json();
+        outfitCatalog = files
+          .filter(file => file.type === "file" && /\.(png|jpe?g|webp|gif)$/i.test(file.name))
+          .map(file => ({ file: file.name, name: outfitDisplayName(file.name), image: file.download_url }))
+          .sort((a, b) => a.name.localeCompare(b.name, "ko"));
+        if (!outfitCatalog.length) {
+          outfitStatus.textContent = "의상 이미지가 없습니다. images/outfits 폴더를 확인해 주세요.";
+          return;
+        }
+        outfitStatus.textContent = "사진을 누르면 코디를 선택할 수 있습니다.";
+        renderOutfits();
+      } catch (error) {
+        outfitStatus.textContent = "의상 목록을 불러오지 못했습니다. 잠시 후 새로고침해 주세요.";
+      }
     }
 
     const DRAFT_KEY = "aipriBusPartsDraft";
@@ -524,8 +586,15 @@
       savedCharacterStatus.textContent = "현재 편집 중인 작업을 초기화했습니다. 저장된 캐릭터는 유지됩니다.";
     });
 
+    document.getElementById("clearOutfit").addEventListener("click", () => {
+      delete selections.outfit;
+      renderOutfits();
+      saveState();
+    });
+
     restoreState();
     loadCatalog();
+    loadOutfits();
   </script>
 </body>
 </html>
