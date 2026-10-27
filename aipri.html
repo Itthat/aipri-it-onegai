@@ -12,16 +12,14 @@
     .parts-name { width: 100%; box-sizing: border-box; margin-bottom: 18px; padding: 12px 14px; border: 1px solid #b8dfd6; border-radius: 10px; background: #fff; color: #285650; font: inherit; }
     .parts-table-wrap { width: 100%; overflow: hidden; border: 1px solid #b8dfd6; border-radius: 12px; background: #fff; box-sizing: border-box; }
     .parts-table { width: 100%; border-collapse: separate; border-spacing: 3px; table-layout: fixed; }
-    .parts-table td { width: 14.285%; min-width: 0; box-sizing: border-box; padding: 4px; border: 1px solid #d5ebe5; border-radius: 7px; text-align: center; vertical-align: top; background: #f8fffc; }
+    .parts-table td { width: 12.5%; min-width: 0; box-sizing: border-box; padding: 4px; border: 1px solid #d5ebe5; border-radius: 7px; text-align: center; vertical-align: top; background: #f8fffc; }
     .part-label { display: block; min-height: 2.5em; margin-bottom: 4px; color: #285650; font-size: clamp(8px, 1vw, 12px); font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
     .part-pick { display: flex; width: 100%; aspect-ratio: 1 / 1; align-items: center; justify-content: center; box-sizing: border-box; padding: 2px; overflow: hidden; border: 1px dashed #8bcabd; border-radius: 6px; background: #f0fbf7; color: #398579; cursor: pointer; }
     .part-pick:hover { border-color: #359e8e; background: #e1f7f0; }
     .part-pick img { display: block; width: 100%; height: 100%; object-fit: contain; }
     .part-pick span { font-size: clamp(14px, 2vw, 24px); }
     .part-clear { display: block; max-width: 100%; margin: 4px auto 0; padding: 3px 5px; border: 0; border-radius: 5px; background: #e0f4ee; color: #326e64; cursor: pointer; font-size: 10px; }
-    .qr-controls { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; }
-    .qr-preview { display: flex; width: 100%; aspect-ratio: 1 / 1; box-sizing: border-box; align-items: center; justify-content: center; object-fit: contain; border: 1px dashed #8bcabd; border-radius: 6px; background: #f0fbf7; color: #398579; }
-    .qr-controls label, .parts-button { display: inline-block; max-width: 100%; box-sizing: border-box; padding: 5px 3px; border: 0; border-radius: 6px; background: #bce9dc; color: #285650; font: inherit; font-size: clamp(8px, 0.9vw, 11px); cursor: pointer; overflow-wrap: anywhere; }
+    .parts-button { display: inline-block; padding: 8px 12px; border: 0; border-radius: 8px; background: #bce9dc; color: #285650; font: inherit; cursor: pointer; }
     .parts-hint { margin: 12px 0; color: #64877f; font-size: 13px; text-align: center; }
     .parts-panel { margin-top: 24px; padding: 18px; border: 1px solid #cce7df; border-radius: 14px; background: #f8fffc; }
     .parts-panel h2 { margin: 0 0 14px; color: #285650; font-size: 20px; text-align: center; }
@@ -33,13 +31,11 @@
     .parts-modal-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
     .parts-modal-top h2 { margin: 0; color: #285650; font-size: 20px; }
     .parts-close { border: 0; background: transparent; color: #285650; font-size: 26px; cursor: pointer; }
-    .parts-search { width: 100%; box-sizing: border-box; margin-bottom: 12px; padding: 10px; border: 1px solid #b8dfd6; border-radius: 9px; font: inherit; }
     .parts-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 9px; overflow-y: auto; padding: 2px; }
     .parts-option { display: flex; align-items: center; justify-content: center; aspect-ratio: 1 / 1; min-width: 0; padding: 6px; border: 1px solid #d5ebe5; border-radius: 10px; background: #f0fbf7; cursor: pointer; }
     .parts-option:hover { border-color: #359e8e; background: #e1f7f0; }
     .parts-option img { width: 100%; height: 100%; object-fit: contain; }
     .parts-loading { grid-column: 1 / -1; padding: 28px 8px; color: #64877f; text-align: center; }
-    #qrUpload { display: none; }
     @media (max-width: 600px) {
       .parts-page { padding-right: 4px; padding-left: 4px; }
       .parts-table { border-spacing: 2px; }
@@ -66,7 +62,9 @@
         <tbody id="partsTableBody"></tbody>
       </table>
     </div>
-    <p class="parts-hint">칸을 누르면 파츠를 선택할 수 있습니다. 파츠와 QR은 한 줄에 7칸씩 두 줄로 배치됩니다.</p>
+
+    <p class="parts-hint">칸을 누르면 파츠를 선택할 수 있습니다. 애니메이션 캐릭터 헤어는 앞머리 사용이 불가능합니다.</p>
+
     <div class="parts-actions">
       <button class="parts-button" id="saveParts" type="button">선택 내용 저장</button>
       <button class="parts-button" id="resetParts" type="button">선택 초기화</button>
@@ -106,14 +104,11 @@
         <h2 id="modalTitle">파츠 선택</h2>
         <button type="button" class="parts-close" id="closeModal" aria-label="닫기">×</button>
       </div>
-      <input id="partsSearch" class="parts-search" type="search" placeholder="파츠 검색">
       <div id="partsOptions" class="parts-options">
         <div class="parts-loading">파츠 목록을 불러오는 중입니다…</div>
       </div>
     </div>
   </div>
-
-  <input id="qrUpload" type="file" accept="image/*" hidden>
 
   <script>
     const PART_CATEGORIES = [
@@ -129,115 +124,68 @@
       { key: "hairDecoration", label: "헤어 데코", prefixes: ["Decoration_"] },
       { key: "makeup", label: "메이크업", prefixes: ["Makeup_", "Make_"] },
       { key: "onePoint", label: "원 포인트", prefixes: ["Onepoint_", "OnePoint_"] },
-      { key: "jewel", label: "부탁해 주얼", prefixes: ["Jewel_"] }
+      { key: "jewel", label: "부탁해 주얼", prefixes: ["Jewel_"] },
+      { key: "outfit", label: "의상", prefixes: ["Outfit_", "Coordinate_", "Coord_", "Code_"] },
+      { key: "song", label: "악곡", prefixes: ["Song_", "Music_", "Songtitle_", "Stage_"] }
     ];
 
     const PARTS_API = "https://api.github.com/repos/Itthat/aipri-mychara/contents/images/parts";
     const selections = {};
     let catalog = [];
     let activeCategory = null;
-    let qrImage = localStorage.getItem("aipriBusQr") || "";
 
     const tableBody = document.getElementById("partsTableBody");
     const modal = document.getElementById("partsModal");
     const optionsBox = document.getElementById("partsOptions");
-    const searchBox = document.getElementById("partsSearch");
 
     function renderTable() {
       tableBody.innerHTML = "";
+      const items = PART_CATEGORIES.map(category => ({ category }));
 
-      const items = [
-        ...PART_CATEGORIES.map(category => ({ type: "part", category })),
-        { type: "qr" }
-      ];
-
+      // 파츠가 15개이므로 첫 줄 8칸, 둘째 줄 7칸으로 배치합니다.
       for (let rowIndex = 0; rowIndex < 2; rowIndex++) {
         const row = document.createElement("tr");
-        const rowItems = items.slice(rowIndex * 7, rowIndex * 7 + 7);
+        const rowItems = items.slice(rowIndex * 8, rowIndex * 8 + 8);
 
         rowItems.forEach(item => {
+          const category = item.category;
           const cell = document.createElement("td");
           const label = document.createElement("span");
           label.className = "part-label";
+          label.textContent = category.label;
+          cell.appendChild(label);
 
-          if (item.type === "part") {
-            const category = item.category;
-            label.textContent = category.label;
-            cell.appendChild(label);
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "part-pick";
+          const selected = selections[category.key];
 
-            const button = document.createElement("button");
-            button.type = "button";
-            button.className = "part-pick";
-            const selected = selections[category.key];
-
-            if (selected) {
-              const image = document.createElement("img");
-              image.src = selected.image;
-              image.alt = "";
-              button.appendChild(image);
-            } else {
-              const plus = document.createElement("span");
-              plus.textContent = "＋";
-              button.appendChild(plus);
-            }
-
-            button.setAttribute("aria-label", category.label + " 선택");
-            button.addEventListener("click", () => openPicker(category));
-            cell.appendChild(button);
-
-            if (selected) {
-              const clear = document.createElement("button");
-              clear.type = "button";
-              clear.className = "part-clear";
-              clear.textContent = "해제";
-              clear.addEventListener("click", () => {
-                delete selections[category.key];
-                renderTable();
-                saveState();
-              });
-              cell.appendChild(clear);
-            }
+          if (selected) {
+            const image = document.createElement("img");
+            image.src = selected.image;
+            image.alt = "";
+            button.appendChild(image);
           } else {
-            label.textContent = "QR";
-            cell.appendChild(label);
+            const plus = document.createElement("span");
+            plus.textContent = "＋";
+            button.appendChild(plus);
+          }
 
-            const controls = document.createElement("div");
-            controls.className = "qr-controls";
+          button.setAttribute("aria-label", category.label + " 선택");
+          button.addEventListener("click", () => openPicker(category));
+          cell.appendChild(button);
 
-            if (qrImage) {
-              const preview = document.createElement("img");
-              preview.className = "qr-preview";
-              preview.src = qrImage;
-              preview.alt = "등록한 QR 사진";
-              controls.appendChild(preview);
-            } else {
-              const empty = document.createElement("div");
-              empty.className = "qr-preview";
-              empty.textContent = "＋";
-              empty.setAttribute("aria-hidden", "true");
-              controls.appendChild(empty);
-            }
-
-            const uploadLabel = document.createElement("label");
-            uploadLabel.htmlFor = "qrUpload";
-            uploadLabel.textContent = qrImage ? "사진 변경" : "사진 추가";
-            controls.appendChild(uploadLabel);
-
-            if (qrImage) {
-              const remove = document.createElement("button");
-              remove.type = "button";
-              remove.className = "part-clear";
-              remove.textContent = "삭제";
-              remove.addEventListener("click", () => {
-                qrImage = "";
-                localStorage.removeItem("aipriBusQr");
-                renderTable();
-                saveState();
-              });
-              controls.appendChild(remove);
-            }
-
-            cell.appendChild(controls);
+          if (selected) {
+            const clear = document.createElement("button");
+            clear.type = "button";
+            clear.className = "part-clear";
+            clear.textContent = "해제";
+            clear.addEventListener("click", () => {
+              delete selections[category.key];
+              renderTable();
+              saveState();
+            });
+            cell.appendChild(clear);
           }
 
           row.appendChild(cell);
@@ -249,9 +197,11 @@
 
     async function loadCatalog() {
       optionsBox.innerHTML = '<div class="parts-loading">파츠 목록을 불러오는 중입니다…</div>';
+
       try {
         const response = await fetch(PARTS_API);
         if (!response.ok) throw new Error("목록 요청 실패");
+
         const files = await response.json();
         catalog = files
           .filter(file => file.type === "file" && /\.(webp|png|jpe?g)$/i.test(file.name))
@@ -259,6 +209,7 @@
             file: file.name,
             image: file.download_url
           }));
+
         if (!catalog.length) throw new Error("이미지 없음");
         if (activeCategory) showOptions(activeCategory);
       } catch (error) {
@@ -269,10 +220,8 @@
     function openPicker(category) {
       activeCategory = category;
       document.getElementById("modalTitle").textContent = category.label + " 선택";
-      searchBox.value = "";
       modal.classList.add("open");
       showOptions(category);
-      searchBox.focus();
     }
 
     function showOptions(category) {
@@ -281,15 +230,14 @@
         return;
       }
 
-      const query = searchBox.value.trim().toLowerCase();
       const matching = catalog.filter(item =>
         category.prefixes.some(prefix => item.file.toLowerCase().startsWith(prefix.toLowerCase()))
-        && (!query || item.file.toLowerCase().includes(query))
       );
 
       optionsBox.innerHTML = "";
+
       if (!matching.length) {
-        optionsBox.innerHTML = '<div class="parts-loading">이 종류의 파츠를 찾지 못했습니다.</div>';
+        optionsBox.innerHTML = '<div class="parts-loading">이 종류의 이미지를 찾지 못했습니다.</div>';
         return;
       }
 
@@ -297,11 +245,13 @@
         const button = document.createElement("button");
         button.type = "button";
         button.className = "parts-option";
+
         const image = document.createElement("img");
         image.loading = "lazy";
         image.src = item.image;
         image.alt = "";
         button.appendChild(image);
+
         button.setAttribute("aria-label", "파츠 선택");
         button.addEventListener("click", () => {
           selections[category.key] = { image: item.image };
@@ -309,6 +259,7 @@
           saveState();
           closePicker();
         });
+
         optionsBox.appendChild(button);
       });
     }
@@ -321,13 +272,13 @@
     function saveState() {
       const data = {
         name: document.getElementById("characterName").value,
-        selections,
-        qrImage
+        selections
       };
+
       try {
         localStorage.setItem("aipriBusParts", JSON.stringify(data));
       } catch (error) {
-        alert("저장 공간이 부족합니다. QR 사진 크기를 줄인 뒤 다시 시도해 주세요.");
+        alert("저장 공간이 부족합니다. 선택한 이미지를 줄인 뒤 다시 시도해 주세요.");
       }
     }
 
@@ -335,64 +286,41 @@
       try {
         const data = JSON.parse(localStorage.getItem("aipriBusParts") || "{}");
         document.getElementById("characterName").value = data.name || "";
+
         if (data.selections && typeof data.selections === "object") {
           Object.assign(selections, data.selections);
         }
-        if (data.qrImage) qrImage = data.qrImage;
       } catch (error) {
         console.warn("저장된 파츠 정보를 불러오지 못했습니다.", error);
       }
+
       renderTable();
     }
 
     document.getElementById("closeModal").addEventListener("click", closePicker);
+
     modal.addEventListener("click", event => {
       if (event.target === modal) closePicker();
     });
+
     document.addEventListener("keydown", event => {
       if (event.key === "Escape") closePicker();
     });
-    searchBox.addEventListener("input", () => {
-      if (activeCategory) showOptions(activeCategory);
-    });
+
     document.getElementById("characterName").addEventListener("input", saveState);
+
     document.getElementById("saveParts").addEventListener("click", () => {
       saveState();
       alert("선택 내용이 이 브라우저에 저장되었습니다.");
     });
+
     document.getElementById("resetParts").addEventListener("click", () => {
-      if (!confirm("선택한 파츠와 QR 사진을 초기화할까요?")) return;
+      if (!confirm("선택한 파츠를 초기화할까요?")) return;
+
       Object.keys(selections).forEach(key => delete selections[key]);
-      qrImage = "";
-      localStorage.removeItem("aipriBusQr");
       localStorage.removeItem("aipriBusParts");
       document.getElementById("characterName").value = "";
       renderTable();
-    });
-
-    document.getElementById("qrUpload").addEventListener("change", event => {
-      const file = event.target.files[0];
-      if (!file) return;
-      if (!file.type.startsWith("image/")) {
-        alert("이미지 파일을 선택해 주세요.");
-        event.target.value = "";
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = () => {
-        qrImage = reader.result;
-        try {
-          localStorage.setItem("aipriBusQr", qrImage);
-          renderTable();
-          saveState();
-        } catch (error) {
-          qrImage = "";
-          alert("사진 용량이 커서 저장하지 못했습니다. 더 작은 이미지로 시도해 주세요.");
-          renderTable();
-        }
-      };
-      reader.readAsDataURL(file);
-      event.target.value = "";
     });
 
     restoreState();
