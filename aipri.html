@@ -38,7 +38,23 @@
     .saved-characters h2 { margin: 0 0 10px; color: #285650; font-size: 18px; text-align: center; }
     .saved-character-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
     .saved-character-select { flex: 1 1 220px; min-width: 0; max-width: 100%; padding: 9px; border: 1px solid #b8dfd6; border-radius: 8px; background: #fff; color: #285650; font: inherit; }
-    .saved-character-status { margin: 10px 0 0; color: #64877f; font-size: 12px; text-align: center; }
+    .saved-character-status { margin: 10px 0 12px; color: #64877f; font-size: 12px; text-align: center; }
+    .saved-character-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .saved-character-item { display: inline-flex; align-items: stretch; max-width: 100%; overflow: hidden; border: 1px solid #b8dfd6; border-radius: 9px; background: #fff; }
+    .saved-character-load { max-width: min(260px, 70vw); padding: 9px 12px; border: 0; background: transparent; color: #285650; font: inherit; cursor: pointer; overflow-wrap: anywhere; }
+    .saved-character-load:hover { background: #e8f8f2; }
+    .saved-character-delete { padding: 0 10px; border: 0; border-left: 1px solid #d5ebe5; background: #f5fbf8; color: #64877f; font: inherit; cursor: pointer; }
+    .saved-character-delete:hover { background: #fbeaea; color: #a34343; }
+    .site-dialog { position: fixed; inset: 0; z-index: 10001; display: none; align-items: center; justify-content: center; padding: 16px; background: #183b3699; }
+    .site-dialog.open { display: flex; }
+    .site-dialog-box { width: min(100%, 420px); padding: 22px; border: 1px solid #cce7df; border-radius: 16px; background: #fafffd; box-shadow: 0 12px 42px #0003; box-sizing: border-box; }
+    .site-dialog-box h2 { margin: 0 0 10px; color: #285650; font-size: 20px; }
+    .site-dialog-message { margin: 0 0 20px; color: #456d65; line-height: 1.6; white-space: pre-line; overflow-wrap: anywhere; }
+    .site-dialog-input { width: 100%; box-sizing: border-box; margin: 0 0 16px; padding: 10px 12px; border: 1px solid #b8dfd6; border-radius: 8px; color: #285650; font: inherit; }
+    .site-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    .site-dialog-button { padding: 9px 14px; border: 1px solid #b8dfd6; border-radius: 8px; background: #fff; color: #285650; font: inherit; cursor: pointer; }
+    .site-dialog-button.primary { border-color: #8bcabd; background: #bce9dc; font-weight: 700; }
+    .site-dialog-button.danger { border-color: #e8caca; background: #fff4f4; color: #a34343; }
     .parts-modal { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; padding: 16px; background: #183b3699; }
     .parts-modal.open { display: flex; }
     .parts-modal-box { display: flex; flex-direction: column; width: min(100%, 760px); max-height: 85vh; padding: 18px; border-radius: 16px; background: #fafffd; box-shadow: 0 10px 40px #0002; }
@@ -85,14 +101,8 @@
 
     <section class="saved-characters" aria-labelledby="savedCharactersTitle">
       <h2 id="savedCharactersTitle">저장된 캐릭터</h2>
-      <div class="saved-character-controls">
-        <select id="savedCharacterList" class="saved-character-select" aria-label="불러올 캐릭터 선택">
-          <option value="">저장된 캐릭터가 없습니다.</option>
-        </select>
-        <button class="parts-button" id="loadCharacter" type="button">불러오기</button>
-        <button class="parts-button" id="deleteCharacter" type="button">삭제</button>
-      </div>
-      <p id="savedCharacterStatus" class="saved-character-status" aria-live="polite">저장한 캐릭터는 이 브라우저에 보관됩니다.</p>
+      <p id="savedCharacterStatus" class="saved-character-status" aria-live="polite">저장된 캐릭터는 이 브라우저에 보관됩니다.</p>
+      <div id="savedCharacterButtons" class="saved-character-buttons" aria-label="저장된 캐릭터 목록"></div>
     </section>
 
     <div class="work-panels">
@@ -140,6 +150,14 @@
     </div>
   </div>
 
+  <div class="site-dialog" id="siteDialog" role="dialog" aria-modal="true" aria-labelledby="siteDialogTitle">
+    <div class="site-dialog-box">
+      <h2 id="siteDialogTitle">알림</h2>
+      <p class="site-dialog-message" id="siteDialogMessage"></p>
+      <input class="site-dialog-input" id="siteDialogInput" type="text" hidden>
+      <div class="site-dialog-actions" id="siteDialogActions"></div>
+    </div>
+  </div>
 
   <script>
     const PART_CATEGORIES = [
@@ -307,8 +325,57 @@
     const DRAFT_KEY = "aipriBusPartsDraft";
     const LEGACY_KEY = "aipriBusParts";
     const SAVED_CHARACTERS_KEY = "aipriBusSavedCharacters";
-    const savedCharacterList = document.getElementById("savedCharacterList");
+    const savedCharacterButtons = document.getElementById("savedCharacterButtons");
     const savedCharacterStatus = document.getElementById("savedCharacterStatus");
+    const siteDialog = document.getElementById("siteDialog");
+    const siteDialogTitle = document.getElementById("siteDialogTitle");
+    const siteDialogMessage = document.getElementById("siteDialogMessage");
+    const siteDialogInput = document.getElementById("siteDialogInput");
+    const siteDialogActions = document.getElementById("siteDialogActions");
+
+    function showSiteDialog({ title = "알림", message = "", confirmText = "확인", cancelText = null, danger = false, input = false, defaultValue = "" }) {
+      return new Promise(resolve => {
+        siteDialogTitle.textContent = title;
+        siteDialogMessage.textContent = message;
+        siteDialogInput.hidden = !input;
+        siteDialogInput.value = defaultValue;
+        siteDialogActions.innerHTML = "";
+        const finish = value => {
+          siteDialog.classList.remove("open");
+          document.removeEventListener("keydown", onKeyDown);
+          resolve(value);
+        };
+        const onKeyDown = event => {
+          if (event.key === "Escape") finish(input ? null : false);
+          if (event.key === "Enter" && input) finish(siteDialogInput.value.trim());
+        };
+        if (cancelText) {
+          const cancel = document.createElement("button");
+          cancel.type = "button";
+          cancel.className = "site-dialog-button";
+          cancel.textContent = cancelText;
+          cancel.addEventListener("click", () => finish(input ? null : false));
+          siteDialogActions.appendChild(cancel);
+        }
+        const accept = document.createElement("button");
+        accept.type = "button";
+        accept.className = "site-dialog-button primary" + (danger ? " danger" : "");
+        accept.textContent = confirmText;
+        accept.addEventListener("click", () => finish(input ? siteDialogInput.value.trim() : true));
+        siteDialogActions.appendChild(accept);
+        siteDialog.classList.add("open");
+        document.addEventListener("keydown", onKeyDown);
+        if (input) siteDialogInput.focus(); else accept.focus();
+      });
+    }
+
+    function siteAlert(message, title = "알림") {
+      return showSiteDialog({ title, message, confirmText: "확인" });
+    }
+
+    function siteConfirm(message, title = "확인") {
+      return showSiteDialog({ title, message, confirmText: "진행", cancelText: "취소" });
+    }
 
     function getSavedCharacters() {
       try {
@@ -319,30 +386,53 @@
       }
     }
 
-    function refreshSavedCharacterList(selectName = "") {
+    function refreshSavedCharacterList() {
       const saved = getSavedCharacters();
       const names = Object.keys(saved).sort((a, b) => a.localeCompare(b, "ko"));
-      savedCharacterList.innerHTML = "";
+      savedCharacterButtons.innerHTML = "";
       if (!names.length) {
-        const option = document.createElement("option");
-        option.value = "";
-        option.textContent = "저장된 캐릭터가 없습니다.";
-        savedCharacterList.appendChild(option);
-        savedCharacterList.disabled = true;
-        document.getElementById("loadCharacter").disabled = true;
-        document.getElementById("deleteCharacter").disabled = true;
+        savedCharacterStatus.textContent = "저장된 캐릭터는 이 브라우저에 보관됩니다.";
         return;
       }
-      savedCharacterList.disabled = false;
-      document.getElementById("loadCharacter").disabled = false;
-      document.getElementById("deleteCharacter").disabled = false;
+      savedCharacterStatus.textContent = "불러올 캐릭터를 선택하세요. 캐릭터 이름을 누르면 바로 불러옵니다.";
       names.forEach(name => {
-        const option = document.createElement("option");
-        option.value = name;
-        option.textContent = name;
-        savedCharacterList.appendChild(option);
+        const item = document.createElement("div");
+        item.className = "saved-character-item";
+        const loadButton = document.createElement("button");
+        loadButton.type = "button";
+        loadButton.className = "saved-character-load";
+        loadButton.textContent = name;
+        loadButton.title = name + " 불러오기";
+        loadButton.addEventListener("click", async () => {
+          const currentName = document.getElementById("characterName").value.trim();
+          const hasCurrentWork = currentName || Object.keys(selections).length;
+          if (hasCurrentWork && !(await siteConfirm("현재 편집 중인 내용 대신 ‘" + name + "’을(를) 불러올까요?", "캐릭터 불러오기"))) return;
+          const latest = getSavedCharacters();
+          if (!latest[name]) { refreshSavedCharacterList(); return; }
+          applyCharacterData(latest[name]);
+          savedCharacterStatus.textContent = "‘" + name + "’ 캐릭터를 불러왔습니다.";
+        });
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "saved-character-delete";
+        deleteButton.textContent = "×";
+        deleteButton.setAttribute("aria-label", name + " 삭제");
+        deleteButton.title = "삭제";
+        deleteButton.addEventListener("click", async () => {
+          if (!(await siteConfirm("저장된 ‘" + name + "’ 캐릭터를 삭제할까요?", "캐릭터 삭제"))) return;
+          const latest = getSavedCharacters();
+          delete latest[name];
+          try {
+            localStorage.setItem(SAVED_CHARACTERS_KEY, JSON.stringify(latest));
+            refreshSavedCharacterList();
+            savedCharacterStatus.textContent = "‘" + name + "’ 캐릭터를 삭제했습니다.";
+          } catch (error) {
+            await siteAlert("캐릭터 목록을 업데이트하지 못했습니다.");
+          }
+        });
+        item.append(loadButton, deleteButton);
+        savedCharacterButtons.appendChild(item);
       });
-      if (names.includes(selectName)) savedCharacterList.value = selectName;
     }
 
     function saveState() {
@@ -404,61 +494,35 @@
       reader.readAsDataURL(file);
       event.target.value = "";
     });
-    document.getElementById("saveParts").addEventListener("click", () => {
+    document.getElementById("saveParts").addEventListener("click", async () => {
       const name = document.getElementById("characterName").value.trim();
       if (!name) {
-        alert("먼저 캐릭터 이름을 입력해 주세요.");
+        await siteAlert("먼저 캐릭터 이름을 입력해 주세요.", "캐릭터 저장");
         document.getElementById("characterName").focus();
         return;
       }
       const saved = getSavedCharacters();
       const alreadyExists = Object.prototype.hasOwnProperty.call(saved, name);
-      if (alreadyExists && !confirm("같은 이름의 캐릭터가 이미 있습니다. 기존 저장 내용을 덮어쓸까요?")) return;
+      if (alreadyExists && !(await siteConfirm("같은 이름의 캐릭터가 이미 있습니다. 기존 저장 내용을 덮어쓸까요?", "덮어쓰기 확인"))) return;
       saved[name] = { name, selections: { ...selections }, updatedAt: new Date().toISOString() };
       try {
         localStorage.setItem(SAVED_CHARACTERS_KEY, JSON.stringify(saved));
         saveState();
-        refreshSavedCharacterList(name);
-        savedCharacterStatus.textContent = `‘${name}’ 캐릭터를 저장했습니다. 이 브라우저에서 불러올 수 있습니다.`;
-      } catch (error) {
-        alert("저장 공간이 부족해 캐릭터를 저장하지 못했습니다. QR 이미지 크기를 줄여 주세요.");
-      }
-    });
-
-    document.getElementById("loadCharacter").addEventListener("click", () => {
-      const name = savedCharacterList.value;
-      const saved = getSavedCharacters();
-      if (!name || !saved[name]) return;
-      if (!confirm("현재 작업 중인 내용 대신 선택한 캐릭터를 불러올까요? 저장하지 않은 변경 사항은 목록에 저장되지 않습니다.")) return;
-      applyCharacterData(saved[name]);
-      savedCharacterStatus.textContent = `‘${name}’ 캐릭터를 불러왔습니다.`;
-    });
-
-    document.getElementById("deleteCharacter").addEventListener("click", () => {
-      const name = savedCharacterList.value;
-      const saved = getSavedCharacters();
-      if (!name || !saved[name]) return;
-      if (!confirm(`저장된 ‘${name}’ 캐릭터를 삭제할까요?`)) return;
-      delete saved[name];
-      try {
-        localStorage.setItem(SAVED_CHARACTERS_KEY, JSON.stringify(saved));
         refreshSavedCharacterList();
-        savedCharacterStatus.textContent = `‘${name}’ 캐릭터를 삭제했습니다.`;
+        savedCharacterStatus.textContent = "‘" + name + "’ 캐릭터를 저장했습니다.";
       } catch (error) {
-        alert("캐릭터 목록을 업데이트하지 못했습니다.");
+        await siteAlert("저장 공간이 부족해 캐릭터를 저장하지 못했습니다. QR 이미지 크기를 줄여 주세요.", "저장 실패");
       }
     });
 
-    document.getElementById("resetParts").addEventListener("click", () => {
-      if (!confirm("현재 편집 중인 파츠와 QR 이미지를 초기화할까요? 저장된 캐릭터 목록은 삭제되지 않습니다.")) return;
+    document.getElementById("resetParts").addEventListener("click", async () => {
+      if (!(await siteConfirm("현재 편집 중인 파츠와 QR 이미지를 초기화할까요? 저장된 캐릭터 목록은 삭제되지 않습니다.", "선택 초기화"))) return;
       Object.keys(selections).forEach(key => delete selections[key]);
       document.getElementById("characterName").value = "";
       renderTable();
       saveState();
       savedCharacterStatus.textContent = "현재 편집 중인 작업을 초기화했습니다. 저장된 캐릭터는 유지됩니다.";
     });
-
-
 
     restoreState();
     loadCatalog();
