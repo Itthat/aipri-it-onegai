@@ -1,4 +1,4 @@
-
+```html
 <!doctype html>
 <html lang="ko">
 <head>
@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>아이프리 대행 | 버스</title>
   <link rel="stylesheet" href="style.css?v=5">
-  <script src="or-photos.js" defer></script>
   <style>
     .parts-page { width: min(100%, 1200px); margin: 0 auto; padding: 20px 10px 40px; color: #285650; box-sizing: border-box; }
     .parts-name { width: 100%; box-sizing: border-box; margin-bottom: 18px; padding: 12px 14px; border: 1px solid #b8dfd6; border-radius: 10px; background: #fff; color: #285650; font: inherit; }
@@ -19,11 +18,18 @@
     .part-pick img { display: block; width: 100%; height: 100%; object-fit: contain; }
     .part-pick span { font-size: clamp(14px, 2vw, 24px); }
     .part-clear { display: block; max-width: 100%; margin: 4px auto 0; padding: 3px 5px; border: 0; border-radius: 5px; background: #e0f4ee; color: #326e64; cursor: pointer; font-size: 10px; }
-    .parts-button { display: inline-block; padding: 8px 12px; border: 0; border-radius: 8px; background: #bce9dc; color: #285650; font: inherit; cursor: pointer; }
+    .parts-button { display: inline-block; max-width: 100%; box-sizing: border-box; padding: 5px 10px; border: 0; border-radius: 6px; background: #bce9dc; color: #285650; font: inherit; font-size: 12px; cursor: pointer; }
     .parts-hint { margin: 12px 0; color: #64877f; font-size: 13px; text-align: center; }
     .parts-panel { margin-top: 24px; padding: 18px; border: 1px solid #cce7df; border-radius: 14px; background: #f8fffc; }
     .parts-panel h2 { margin: 0 0 14px; color: #285650; font-size: 20px; text-align: center; }
     .parts-panel textarea { width: 100%; box-sizing: border-box; border: 1px solid #b8dfd6; border-radius: 9px; }
+    .work-panels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 24px; }
+    .work-panel { min-width: 0; padding: 18px; border: 1px solid #cce7df; border-radius: 14px; background: #f8fffc; }
+    .work-panel h2 { margin: 0 0 8px; color: #285650; font-size: 20px; text-align: center; }
+    .work-panel-description { margin: 0 0 16px; color: #64877f; font-size: 13px; text-align: center; }
+    .work-placeholder { display: flex; min-height: 190px; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 16px; border: 1px dashed #8bcabd; border-radius: 10px; background: #f0fbf7; color: #398579; text-align: center; }
+    .work-placeholder-symbol { font-size: 32px; line-height: 1; }
+    .work-placeholder small { color: #64877f; }
     .parts-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
     .parts-modal { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; padding: 16px; background: #183b3699; }
     .parts-modal.open { display: flex; }
@@ -42,6 +48,8 @@
       .parts-table td { padding: 2px; }
       .part-label { min-height: 3em; font-size: 8px; }
       .part-clear { padding: 2px; font-size: 8px; }
+      .work-panels { grid-template-columns: 1fr; gap: 12px; }
+      .work-panel { padding: 14px; }
     }
   </style>
 </head>
@@ -62,30 +70,33 @@
         <tbody id="partsTableBody"></tbody>
       </table>
     </div>
-
     <p class="parts-hint">칸을 누르면 파츠를 선택할 수 있습니다. 애니메이션 캐릭터 헤어는 앞머리 사용이 불가능합니다.</p>
-
     <div class="parts-actions">
       <button class="parts-button" id="saveParts" type="button">선택 내용 저장</button>
       <button class="parts-button" id="resetParts" type="button">선택 초기화</button>
     </div>
 
-    <section class="parts-panel">
-      <h2>OR 사진</h2>
-      <p class="parts-hint">추가한 사진은 현재 브라우저에 저장됩니다. 다른 기기와 자동으로 공유되지는 않습니다.</p>
-      <div class="upload-row">
-        <label class="upload-button" for="orUpload">＋ 사진 추가</label>
-        <input id="orUpload" type="file" accept="image/*" multiple hidden>
-        <button id="clearAll" class="button button-danger" type="button">전체 지우기</button>
-      </div>
-      <p id="status" class="status" aria-live="polite">저장된 사진을 불러오는 중입니다…</p>
-      <div id="orGallery" class="photo-gallery" aria-live="polite"></div>
-      <div id="emptyState" class="empty-state" hidden>
-        <span>▧</span>
-        <b>아직 추가한 OR 사진이 없습니다.</b>
-        <small>‘사진 추가’를 눌러 이미지를 선택해 주세요.</small>
-      </div>
-    </section>
+    <div class="work-panels">
+      <section class="work-panel">
+        <h2>의상 선택</h2>
+        <p class="work-panel-description">선택할 의상과 코디를 정리하는 공간입니다.</p>
+        <div class="work-placeholder">
+          <span class="work-placeholder-symbol">＋</span>
+          <b>의상 선택 영역</b>
+          <small>의상 목록과 선택 기능은 추후 추가 예정</small>
+        </div>
+      </section>
+      <section class="work-panel">
+        <h2>악곡 및 프렌드카드</h2>
+        <p class="work-panel-description">악곡과 프렌드카드 관련 항목을 정리하는 공간입니다.</p>
+        <div class="work-placeholder">
+          <span class="work-placeholder-symbol">＋</span>
+          <b>악곡 · 프렌드카드 영역</b>
+          <small>악곡과 프렌드카드 선택 기능은 추후 추가 예정</small>
+        </div>
+      </section>
+    </div>
+    <input id="qrUpload" type="file" accept="image/*" hidden>
 
     <section class="parts-panel">
       <h2>대행 메모</h2>
@@ -125,6 +136,7 @@
       { key: "makeup", label: "메이크업", prefixes: ["Makeup_", "Make_"] },
       { key: "onePoint", label: "원 포인트", prefixes: ["Onepoint_", "OnePoint_"] },
       { key: "jewel", label: "부탁해 주얼", prefixes: ["Jewel_"] },
+      { key: "qr", label: "QR", prefixes: [] },
       { key: "outfit", label: "의상", prefixes: ["Outfit_", "Coordinate_", "Coord_", "Code_"] },
       { key: "song", label: "악곡", prefixes: ["Song_", "Music_", "Songtitle_", "Stage_"] }
     ];
@@ -140,9 +152,8 @@
 
     function renderTable() {
       tableBody.innerHTML = "";
-      const items = PART_CATEGORIES.map(category => ({ category }));
+      const items = PART_CATEGORIES.map(category => ({ type: "part", category }));
 
-      // 파츠가 15개이므로 첫 줄 8칸, 둘째 줄 7칸으로 배치합니다.
       for (let rowIndex = 0; rowIndex < 2; rowIndex++) {
         const row = document.createElement("tr");
         const rowItems = items.slice(rowIndex * 8, rowIndex * 8 + 8);
@@ -160,19 +171,33 @@
           button.className = "part-pick";
           const selected = selections[category.key];
 
-          if (selected) {
-            const image = document.createElement("img");
-            image.src = selected.image;
-            image.alt = "";
-            button.appendChild(image);
+          if (category.key === "qr") {
+            if (selected && selected.image) {
+              const image = document.createElement("img");
+              image.src = selected.image;
+              image.alt = "선택한 QR 이미지";
+              button.appendChild(image);
+            } else {
+              const plus = document.createElement("span");
+              plus.textContent = "＋";
+              button.appendChild(plus);
+            }
+            button.setAttribute("aria-label", "QR 이미지 업로드");
+            button.addEventListener("click", () => document.getElementById("qrUpload").click());
           } else {
-            const plus = document.createElement("span");
-            plus.textContent = "＋";
-            button.appendChild(plus);
+            if (selected) {
+              const image = document.createElement("img");
+              image.src = selected.image;
+              image.alt = "";
+              button.appendChild(image);
+            } else {
+              const plus = document.createElement("span");
+              plus.textContent = "＋";
+              button.appendChild(plus);
+            }
+            button.setAttribute("aria-label", category.label + " 선택");
+            button.addEventListener("click", () => openPicker(category));
           }
-
-          button.setAttribute("aria-label", category.label + " 선택");
-          button.addEventListener("click", () => openPicker(category));
           cell.appendChild(button);
 
           if (selected) {
@@ -187,21 +212,17 @@
             });
             cell.appendChild(clear);
           }
-
           row.appendChild(cell);
         });
-
         tableBody.appendChild(row);
       }
     }
 
     async function loadCatalog() {
       optionsBox.innerHTML = '<div class="parts-loading">파츠 목록을 불러오는 중입니다…</div>';
-
       try {
         const response = await fetch(PARTS_API);
         if (!response.ok) throw new Error("목록 요청 실패");
-
         const files = await response.json();
         catalog = files
           .filter(file => file.type === "file" && /\.(webp|png|jpe?g)$/i.test(file.name))
@@ -209,7 +230,6 @@
             file: file.name,
             image: file.download_url
           }));
-
         if (!catalog.length) throw new Error("이미지 없음");
         if (activeCategory) showOptions(activeCategory);
       } catch (error) {
@@ -235,9 +255,8 @@
       );
 
       optionsBox.innerHTML = "";
-
       if (!matching.length) {
-        optionsBox.innerHTML = '<div class="parts-loading">이 종류의 이미지를 찾지 못했습니다.</div>';
+        optionsBox.innerHTML = '<div class="parts-loading">이 종류의 파츠를 찾지 못했습니다.</div>';
         return;
       }
 
@@ -245,13 +264,11 @@
         const button = document.createElement("button");
         button.type = "button";
         button.className = "parts-option";
-
         const image = document.createElement("img");
         image.loading = "lazy";
         image.src = item.image;
         image.alt = "";
         button.appendChild(image);
-
         button.setAttribute("aria-label", "파츠 선택");
         button.addEventListener("click", () => {
           selections[category.key] = { image: item.image };
@@ -259,7 +276,6 @@
           saveState();
           closePicker();
         });
-
         optionsBox.appendChild(button);
       });
     }
@@ -272,13 +288,12 @@
     function saveState() {
       const data = {
         name: document.getElementById("characterName").value,
-        selections
+        selections,
       };
-
       try {
         localStorage.setItem("aipriBusParts", JSON.stringify(data));
       } catch (error) {
-        alert("저장 공간이 부족합니다. 선택한 이미지를 줄인 뒤 다시 시도해 주세요.");
+        alert("저장 공간이 부족합니다. QR 이미지 크기를 줄인 뒤 다시 시도해 주세요.");
       }
     }
 
@@ -286,37 +301,41 @@
       try {
         const data = JSON.parse(localStorage.getItem("aipriBusParts") || "{}");
         document.getElementById("characterName").value = data.name || "";
-
         if (data.selections && typeof data.selections === "object") {
           Object.assign(selections, data.selections);
         }
       } catch (error) {
         console.warn("저장된 파츠 정보를 불러오지 못했습니다.", error);
       }
-
       renderTable();
     }
 
     document.getElementById("closeModal").addEventListener("click", closePicker);
-
     modal.addEventListener("click", event => {
       if (event.target === modal) closePicker();
     });
-
     document.addEventListener("keydown", event => {
       if (event.key === "Escape") closePicker();
     });
-
     document.getElementById("characterName").addEventListener("input", saveState);
-
+    document.getElementById("qrUpload").addEventListener("change", event => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        selections.qr = { image: reader.result };
+        renderTable();
+        saveState();
+      };
+      reader.readAsDataURL(file);
+      event.target.value = "";
+    });
     document.getElementById("saveParts").addEventListener("click", () => {
       saveState();
       alert("선택 내용이 이 브라우저에 저장되었습니다.");
     });
-
     document.getElementById("resetParts").addEventListener("click", () => {
-      if (!confirm("선택한 파츠를 초기화할까요?")) return;
-
+      if (!confirm("선택한 파츠와 QR 이미지를 초기화할까요?")) return;
       Object.keys(selections).forEach(key => delete selections[key]);
       localStorage.removeItem("aipriBusParts");
       document.getElementById("characterName").value = "";
@@ -328,3 +347,4 @@
   </script>
 </body>
 </html>
+```
