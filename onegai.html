@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>아이프리 대행 | 오네가이 아이프리</title>
+  <title>아이프리 대행 | 오네</title>
   <link rel="stylesheet" href="style.css?v=5">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <style>
@@ -905,7 +905,7 @@
         });
         const name = (document.getElementById("characterName").value.trim() || "아이프리").replace(/[\\/:*?"<>|]/g, "_");
         const link = document.createElement("a");
-        link.download = name + ".png";
+        link.download = name + "_오네.png";
         link.href = canvas.toDataURL("image/png");
         link.click();
       } catch (error) {
