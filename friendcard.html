@@ -64,7 +64,7 @@
 
     .friend-request-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
     .request-slot { display:flex; min-width:0; flex-direction:column; align-items:center; gap:8px; padding:10px; border:1px solid #cce7df; border-radius:10px; background:#f0fbf7; }
-    .request-slot img { display:block; width:100%; aspect-ratio:1/1; object-fit:contain; border-radius:6px; background:#fff; }
+    .request-slot img { display:block; width:auto; height:auto; max-width:100%; max-height:180px; aspect-ratio:auto; object-fit:contain; border-radius:6px; background:#fff; }
     .request-slot .slot-name { width:100%; min-height:2.4em; text-align:center; font-size:12px; overflow-wrap:anywhere; }
     .request-slot .slot-actions { display:flex; width:100%; justify-content:center; align-items:center; flex-wrap:wrap; gap:6px; }
     .request-slot .parts-button { width:auto; min-width:42%; text-align:center; align-self:center; }
