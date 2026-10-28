@@ -779,7 +779,7 @@
           scrollY: 0,
           onclone: clonedDocument => {
             const clonedTarget = clonedDocument.querySelector(".parts-page");
-            clonedTarget.querySelectorAll(".parts-actions, .saved-characters, .parts-hint, .outfit-status, #outfitStatus, .export-actions").forEach(element => {
+            clonedTarget.querySelectorAll(".parts-actions, .saved-characters, .parts-hint, .outfit-status, #outfitStatus, .export-actions, .slot-actions").forEach(element => {
               element.style.display = "none";
             });
             clonedTarget.querySelectorAll("input[type='file']").forEach(element => { element.style.display = "none"; });
