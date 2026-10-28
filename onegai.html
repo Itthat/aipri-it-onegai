@@ -710,8 +710,8 @@
       }
     });
 
-    const DRAFT_KEY = "aipriBusPartsDraft";
-    const LEGACY_KEY = "aipriBusParts";
+    const DRAFT_KEY = "aipriOnegaiDraft";
+    const LEGACY_KEY = "aipriOnegaiParts";
     const SAVED_CHARACTERS_KEY = "aipriBusSavedCharacters";
     const savedCharacterButtons = document.getElementById("savedCharacterButtons");
     const savedCharacterStatus = document.getElementById("savedCharacterStatus");
@@ -905,7 +905,7 @@
         });
         const name = (document.getElementById("characterName").value.trim() || "아이프리").replace(/[\\/:*?"<>|]/g, "_");
         const link = document.createElement("a");
-        link.download = name + "_오네.png";
+        link.download = `${name}_오네.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
       } catch (error) {
