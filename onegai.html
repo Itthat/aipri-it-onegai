@@ -1,8 +1,1000 @@
 <!doctype html>
 <html lang="ko">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>오네 | 대행 신청</title><link rel="stylesheet" href="style.css"></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>아이프리 대행 | 오네가이 아이프리</title>
+  <link rel="stylesheet" href="style.css?v=5">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <style>
+    .parts-table-wrap, .parts-hint, #partsTableBody, #partsModal { display: none !important; }
+    .parts-page { width: min(100%, 1200px); margin: 0 auto; padding: 20px 10px 40px; color: #285650; box-sizing: border-box; }
+    .parts-name { width: 100%; box-sizing: border-box; margin-bottom: 18px; padding: 12px 14px; border: 1px solid #b8dfd6; border-radius: 10px; background: #fff; color: #285650; font: inherit; }
+    .parts-table-wrap { width: 100%; overflow: hidden; border: 1px solid #b8dfd6; border-radius: 12px; background: #fff; box-sizing: border-box; }
+    .parts-table { width: 100%; border-collapse: separate; border-spacing: 3px; table-layout: fixed; }
+    .parts-table td { width: 14.2857%; min-width: 0; box-sizing: border-box; padding: 4px; border: 1px solid #d5ebe5; border-radius: 7px; text-align: center; vertical-align: top; background: #f8fffc; }
+    .part-label { display: block; min-height: 2.5em; margin-bottom: 4px; color: #285650; font-size: clamp(8px, 1vw, 12px); font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
+    .part-pick { display: flex; width: 100%; aspect-ratio: 1 / 1; align-items: center; justify-content: center; box-sizing: border-box; padding: 2px; overflow: hidden; border: 1px solid #8bcabd; border-radius: 6px; background: #f0fbf7; color: #398579; cursor: pointer; }
+    .part-pick:hover { border-color: #359e8e; background: #e1f7f0; }
+    .part-pick img { display: block; width: 100%; height: 100%; box-sizing: border-box; object-fit: contain; border: 0; border-radius: 4px; }
+    .part-pick-blank { background: #f0fbf7; border-color: #8bcabd; }
+    .part-pick-blank:hover { background: #e1f7f0; border-color: #359e8e; }
+    .part-pick span { font-size: clamp(14px, 2vw, 24px); }
+    .part-clear { display: block; max-width: 100%; margin: 4px auto 0; padding: 3px 5px; border: 0; border-radius: 5px; background: #e0f4ee; color: #326e64; cursor: pointer; font-size: 10px; }
+    .qr-controls { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; }
+    .qr-preview { display: flex; width: 100%; aspect-ratio: 1 / 1; box-sizing: border-box; align-items: center; justify-content: center; object-fit: contain; border: 1px dashed #8bcabd; border-radius: 6px; background: #f0fbf7; color: #398579; }
+    .qr-controls label, .parts-button { display: inline-block; max-width: 100%; box-sizing: border-box; padding: 5px 3px; border: 0; border-radius: 6px; background: #bce9dc; color: #285650; font: inherit; font-size: clamp(8px, 0.9vw, 11px); cursor: pointer; overflow-wrap: anywhere; }
+    .parts-hint { margin: 12px 0; color: #64877f; font-size: 13px; text-align: center; }
+    .parts-panel { margin-top: 24px; padding: 18px; border: 1px solid #cce7df; border-radius: 14px; background: #f8fffc; }
+    .parts-panel h2 { margin: 0 0 14px; color: #285650; font-size: 20px; text-align: center; }
+    .parts-panel textarea { width: 100%; box-sizing: border-box; border: 1px solid #b8dfd6; border-radius: 9px; }
+    .work-panels { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 16px; margin-top: 24px; align-items: stretch; }
+    .onegai-right-stack { display:grid; grid-template-rows: 1fr 1fr; gap:16px; min-width:0; }
+    .onegai-qr-preview { display:flex; width:100%; aspect-ratio:1 / 1; max-height:210px; align-items:center; justify-content:center; overflow:hidden; border:1px dashed #8bcabd; border-radius:10px; background:#f0fbf7; color:#64877f; }
+    .onegai-qr-preview img { width:100%; height:100%; object-fit:contain; }
+    .onegai-actions { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .friend-card-slot { aspect-ratio:1 / 1; min-height:0; }
+    .friend-card-slot img { width:100%; height:100%; min-height:0; object-fit:contain; }
+    .friend-card-slot { display:grid; grid-template-rows:minmax(0,1fr) auto auto; }
+    .friend-card-slot-buttons { display:flex; justify-content:center; align-items:center; gap:6px; flex-wrap:wrap; }
+    .friend-card-slot img { grid-row:1; }
+    .friend-card-slot-empty { grid-row:1; }
+    .friend-card-slot-button, .friend-card-remove { grid-row:2; }
+    .work-panel { min-width: 0; padding: 18px; border: 1px solid #cce7df; border-radius: 14px; background: #f8fffc; }
+    .work-panel h2 { margin: 0 0 8px; color: #285650; font-size: 20px; text-align: center; }
+    .work-panel-description { margin: 0 0 16px; color: #64877f; font-size: 13px; text-align: center; }
+    .work-placeholder { display: flex; min-height: 190px; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 16px; border: 1px dashed #8bcabd; border-radius: 10px; background: #f0fbf7; color: #398579; text-align: center; }
+    .work-placeholder-symbol { font-size: 32px; line-height: 1; }
+    .work-placeholder small { color: #64877f; }
+    .outfit-preview { display: flex; min-height: 190px; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 14px; border: 1px dashed #8bcabd; border-radius: 10px; background: #f0fbf7; }
+    .outfit-preview img { display: block; width: min(100%, 180px); max-height: 210px; aspect-ratio: 3 / 4; box-sizing: border-box; object-fit: contain; border: 1px solid #cce7df; border-radius: 7px; background: #fff; }
+    .outfit-preview img[hidden] { display: none; }
+    .outfit-preview-name { max-width: 100%; color: #285650; font-size: 12px; text-align: center; overflow-wrap: anywhere; }
+    .outfit-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 9px; overflow-y: auto; padding: 2px; }
+    .outfit-card { display: flex; min-width: 0; flex-direction: column; align-items: center; justify-content: center; padding: 6px; border: 1px solid #d5ebe5; border-radius: 10px; background: #f0fbf7; color: #285650; font: inherit; cursor: pointer; text-align: center; }
+    .outfit-card:hover, .outfit-card.selected { border-color: #359e8e; background: #e1f7f0; }
+    .outfit-card img { display: block; width: 100%; aspect-ratio: 3 / 4; box-sizing: border-box; object-fit: contain; border: 1px solid #cce7df; border-radius: 6px; background: #fff; }
+    .outfit-card-name { display: block; margin-top: 6px; font-size: 12px; overflow-wrap: anywhere; }
+    .outfit-status { margin: 0 0 12px; color: #64877f; font-size: 12px; text-align: center; }
+    .qr-preview-img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .music-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 0; padding: 12px; border: 1px dashed #8bcabd; border-radius: 10px; background: #f0fbf7; }
+    .music-preview-image { display: block; width: min(100%, 180px); max-height: 210px; aspect-ratio: 3 / 4; box-sizing: border-box; object-fit: contain; border: 1px solid #cce7df; border-radius: 7px; background: #fff; }
+    .music-preview-image[hidden] { display: none; }
+    .music-preview-name { max-width: 100%; color: #285650; font-size: 12px; text-align: center; overflow-wrap: anywhere; }
+    .friend-card-preview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 10px; border: 1px dashed #8bcabd; border-radius: 10px; background: #f0fbf7; color: #398579; }
+    .friend-card-slot { display: flex; min-width: 0; min-height: 170px; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 8px; border: 1px solid #cce7df; border-radius: 8px; background: #fff; text-align: center; }
+    .friend-card-slot img { display: block; width: 100%; max-height: 180px; box-sizing: border-box; object-fit: contain; border: 1px solid #cce7df; border-radius: 5px; }
+    .friend-card-slot-empty { color: #64877f; font-size: 12px; }
+    .friend-card-slot-button { max-width: 100%; padding: 6px 8px; border: 1px solid #b8dfd6; border-radius: 7px; background: #f0fbf7; color: #285650; font: inherit; font-size: 12px; cursor: pointer; }
+    .friend-card-remove { padding: 4px 8px; border: 0; border-radius: 6px; background: #e0f4ee; color: #326e64; font: inherit; font-size: 11px; cursor: pointer; }
+    @media (max-width: 420px) { .friend-card-preview { gap: 5px; padding: 5px; } .friend-card-slot { padding: 5px; } .friend-card-slot-button { font-size: 10px; } }
+    .music-subtitle { margin: 12px 0 8px; color: #285650; font-size: 15px; text-align: center; }
+    @media (max-width: 600px) { .work-panels { grid-template-columns: 1fr; gap: 12px; } .onegai-right-stack { grid-template-rows:auto auto; } .work-panel { padding: 14px; } }
+    .export-actions { display: flex; justify-content: center; margin-top: 16px; }
+    .export-button { display: inline-block; max-width: 100%; box-sizing: border-box; padding: 9px 15px; border: 1px solid #8bcabd; border-radius: 8px; background: #285650; color: #fff; font: inherit; cursor: pointer; }
+    .export-button:disabled { opacity: .65; cursor: wait; }
+    .parts-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
+    .saved-characters { margin-top: 18px; padding: 16px; border: 1px solid #cce7df; border-radius: 12px; background: #f8fffc; }
+    .saved-characters h2 { margin: 0 0 10px; color: #285650; font-size: 18px; text-align: center; }
+    .saved-character-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .saved-character-select { flex: 1 1 220px; min-width: 0; max-width: 100%; padding: 9px; border: 1px solid #b8dfd6; border-radius: 8px; background: #fff; color: #285650; font: inherit; }
+    .saved-character-status { margin: 10px 0 12px; color: #64877f; font-size: 12px; text-align: center; }
+    .saved-character-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .saved-character-item { display: inline-flex; align-items: stretch; max-width: 100%; overflow: hidden; border: 1px solid #b8dfd6; border-radius: 9px; background: #fff; }
+    .saved-character-load { max-width: min(260px, 70vw); padding: 9px 12px; border: 0; background: transparent; color: #285650; font: inherit; cursor: pointer; overflow-wrap: anywhere; }
+    .saved-character-load:hover { background: #e8f8f2; }
+    .saved-character-delete { padding: 0 10px; border: 0; border-left: 1px solid #d5ebe5; background: #f5fbf8; color: #64877f; font: inherit; cursor: pointer; }
+    .saved-character-delete:hover { background: #fbeaea; color: #a34343; }
+    .site-dialog { position: fixed; inset: 0; z-index: 10001; display: none; align-items: center; justify-content: center; padding: 16px; background: #183b3699; }
+    .site-dialog.open { display: flex; }
+    .site-dialog-box { width: min(100%, 420px); padding: 22px; border: 1px solid #cce7df; border-radius: 16px; background: #fafffd; box-shadow: 0 12px 42px #0003; box-sizing: border-box; }
+    .site-dialog-box h2 { margin: 0 0 10px; color: #285650; font-size: 20px; }
+    .site-dialog-message { margin: 0 0 20px; color: #456d65; line-height: 1.6; white-space: pre-line; overflow-wrap: anywhere; }
+    .site-dialog-input { width: 100%; box-sizing: border-box; margin: 0 0 16px; padding: 10px 12px; border: 1px solid #b8dfd6; border-radius: 8px; color: #285650; font: inherit; }
+    .site-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    .site-dialog-button { padding: 9px 14px; border: 1px solid #b8dfd6; border-radius: 8px; background: #fff; color: #285650; font: inherit; cursor: pointer; }
+    .site-dialog-button.primary { border-color: #8bcabd; background: #bce9dc; font-weight: 700; }
+    .site-dialog-button.danger { border-color: #e8caca; background: #fff4f4; color: #a34343; }
+    .parts-modal { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; padding: 16px; background: #183b3699; }
+    .parts-modal.open { display: flex; }
+    .parts-modal-box { display: flex; flex-direction: column; width: min(100%, 760px); max-height: 85vh; padding: 18px; border-radius: 16px; background: #fafffd; box-shadow: 0 10px 40px #0002; }
+    .parts-modal-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .parts-modal-top h2 { margin: 0; color: #285650; font-size: 20px; }
+    .parts-close { border: 0; background: transparent; color: #285650; font-size: 26px; cursor: pointer; }
+    .parts-search { width: 100%; box-sizing: border-box; margin-bottom: 12px; padding: 10px; border: 1px solid #b8dfd6; border-radius: 9px; font: inherit; }
+    .parts-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 9px; overflow-y: auto; padding: 2px; }
+    .parts-option { display: flex; align-items: center; justify-content: center; aspect-ratio: 1 / 1; min-width: 0; padding: 6px; border: 1px solid #d5ebe5; border-radius: 10px; background: #f0fbf7; cursor: pointer; }
+    .parts-option:hover { border-color: #359e8e; background: #e1f7f0; }
+    .blank-option { background: #f0fbf7; }
+    .blank-option:hover { background: #e1f7f0; border-color: #359e8e; }
+    .parts-option img { width: 100%; height: 100%; object-fit: contain; }
+    .parts-loading { grid-column: 1 / -1; padding: 28px 8px; color: #64877f; text-align: center; }
+    @media (max-width: 600px) {
+      .parts-page { padding-right: 4px; padding-left: 4px; }
+      .parts-table { border-spacing: 2px; }
+      .parts-table td { padding: 2px; }
+      .part-label { min-height: 3em; font-size: 8px; }
+      .part-clear { padding: 2px; font-size: 8px; }
+    }
+  </style>
+</head>
 <body>
-<header class="site-header"><a class="brand" href="index.html">AIPRI <span>대행 신청</span></a><nav><a href="aipri.html">아이프리</a><a class="active" href="onegai.html">오네</a><a href="friendcard.html">프카</a></nav></header>
-<main class="content-wrap"><div class="page-heading"><div><p class="eyebrow">02 / HORIZONTAL DEVICE</p><h1>오네</h1><p>가로 기기</p></div><a class="back-link" href="index.html">← 메인으로</a></div>
-<section class="panel"><div class="section-title"><div><p class="eyebrow">REFERENCE</p><h2>파츠 · 코디 · 악곡 사진</h2></div><span class="tag">미리 등록하는 사진</span></div><p class="muted">오네에서 사용하는 파츠·코디·악곡 사진을 이곳에 등록할 예정입니다. 아이프리 페이지와 구분해 관리합니다.</p><div class="empty-gallery"><div class="placeholder-tile"><span>＋</span><b>파츠 사진</b><small>가로 기기용</small></div><div class="placeholder-tile"><span>＋</span><b>코디 사진</b><small>가로 기기용</small></div><div class="placeholder-tile"><span>＋</span><b>악곡 사진</b><small>가로 기기용</small></div></div></section>
-<section class="panel"><h2>오네 신청 항목</h2><p class="muted">현재는 기본 틀입니다. 기존 스프레드시트의 항목과 순서에 맞춰 다음 단계에서 채워 넣을 수 있습니다.</p><div class="form-grid"><label>캐릭터 / 이름<input placeholder="입력해 주세요"></label><label>코드 / 기타 정보<input placeholder="입력해 주세요"></label></div><label class="field-label">요청 사항<textarea rows="4" placeholder="요청 사항을 입력해 주세요."></textarea></label></section></main><footer>오네 · 가로 기기</footer></body></html>
+  <header class="site-header">
+    <nav aria-label="주요 메뉴">
+      <a href="aipri.html">아이프리버스</a>
+      <a href="onegai.html" class="active">오네가이 아이프리</a>
+      <a href="friendcard.html">프렌드카드</a>
+    </nav>
+  </header>
+
+  <main class="parts-page">
+    <input id="characterName" class="parts-name" type="text" placeholder="캐릭터 이름을 입력하세요" aria-label="캐릭터 이름">
+
+    <div class="parts-table-wrap">
+      <table class="parts-table">
+        <tbody id="partsTableBody"></tbody>
+      </table>
+    </div>
+    <p class="parts-hint">칸을 누르면 파츠를 선택할 수 있습니다. 애니메이션 캐릭터 헤어는 앞머리 사용이 불가능합니다.</p>
+    <div class="parts-actions">
+      <button class="parts-button" id="saveParts" type="button">캐릭터 저장</button>
+      <button class="parts-button" id="resetParts" type="button">선택 초기화</button>
+    </div>
+
+    <section class="saved-characters" aria-labelledby="savedCharactersTitle">
+      <h2 id="savedCharactersTitle">저장된 캐릭터</h2>
+      <p id="savedCharacterStatus" class="saved-character-status" aria-live="polite">저장된 캐릭터는 이 브라우저에 보관됩니다.</p>
+      <div id="savedCharacterButtons" class="saved-character-buttons" aria-label="저장된 캐릭터 목록"></div>
+    </section>
+
+    <div class="work-panels">
+      <section class="work-panel">
+        <h2>의상</h2>
+        <div class="outfit-preview" id="outfitPreview" aria-live="polite">
+          <span id="outfitPreviewEmpty">의상을 선택해 주세요.</span>
+          <img id="outfitPreviewImage" alt="선택한 의상" hidden>
+          <span id="outfitPreviewName" class="outfit-preview-name" hidden></span>
+        </div>
+        <p id="outfitStatus" class="outfit-status">의상 목록을 불러오는 중입니다…</p>
+        <div class="parts-actions">
+          <button class="parts-button" id="openOutfitPicker" type="button">의상 선택</button>
+          <button class="parts-button" id="clearOutfit" type="button">삭제</button>
+        </div>
+      </section>
+      <div class="onegai-right-stack">
+        <section class="work-panel">
+          <h2>악곡</h2>
+          <div class="music-card" id="songPreview" aria-live="polite">
+            <span id="songPreviewEmpty">악곡을 선택해 주세요.</span>
+            <img id="songPreviewImage" class="music-preview-image" alt="선택한 악곡" hidden>
+            <span id="songPreviewName" class="music-preview-name" hidden></span>
+          </div>
+          <p id="songStatus" class="outfit-status">악곡 목록을 불러오는 중입니다…</p>
+          <div class="parts-actions">
+            <button class="parts-button" id="openSongPicker" type="button">악곡 선택</button>
+            <button class="parts-button" id="clearSong" type="button">삭제</button>
+          </div>
+        </section>
+        <section class="work-panel">
+          <h2>QR</h2>
+          <div class="onegai-qr-preview" id="onegaiQrPreview">QR 이미지를 올려 주세요.</div>
+          <div class="onegai-actions">
+            <button class="parts-button" id="onegaiQrUploadButton" type="button">이미지 업로드</button>
+            <button class="parts-button" id="onegaiQrDeleteButton" type="button">삭제</button>
+          </div>
+        </section>
+      </div>
+    </div>
+    <section class="work-panel" style="margin-top:16px">
+      <h2>프렌드카드</h2>
+      <div class="friend-card-preview" id="friendCardPreview" aria-live="polite"></div>
+    </section>
+    <input id="qrUpload" type="file" accept="image/*" hidden>
+  <input id="friendCardUpload" type="file" accept="image/*" hidden>
+
+    <section class="parts-panel">
+      <h2>기타</h2>
+      <textarea id="memo" rows="4" placeholder="추가 요청 사항을 적어주세요." aria-label="기타 요청 사항"></textarea>
+    </section>
+    <div class="export-actions">
+      <button class="export-button" id="exportPageImage" type="button">이미지로 내보내기</button>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>ⒸT-ARTS/OAP PROJECT · 개인 제작 비공식 사이트 · ChatGPT의 도움을 받아 제작했습니다.</p>
+  </footer>
+
+  <div class="parts-modal" id="partsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="parts-modal-box">
+      <div class="parts-modal-top">
+        <h2 id="modalTitle">파츠 선택</h2>
+        <button type="button" class="parts-close" id="closeModal" aria-label="닫기">×</button>
+      </div>
+      <div id="partsOptions" class="parts-options">
+        <div class="parts-loading">파츠 목록을 불러오는 중입니다…</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="parts-modal" id="outfitModal" role="dialog" aria-modal="true" aria-labelledby="outfitModalTitle">
+    <div class="parts-modal-box">
+      <div class="parts-modal-top">
+        <h2 id="outfitModalTitle">코디 선택</h2>
+        <button type="button" class="parts-close" id="closeOutfitModal" aria-label="닫기">×</button>
+      </div>
+      <p id="outfitModalStatus" class="outfit-status">의상 목록을 불러오는 중입니다…</p>
+      <div id="outfitGallery" class="outfit-gallery" aria-label="의상 목록"></div>
+    </div>
+  </div>
+
+  <div class="parts-modal" id="songModal" role="dialog" aria-modal="true" aria-labelledby="songModalTitle">
+    <div class="parts-modal-box">
+      <div class="parts-modal-top">
+        <h2 id="songModalTitle">악곡 선택</h2>
+        <button type="button" class="parts-close" id="closeSongModal" aria-label="닫기">×</button>
+      </div>
+      <p id="songModalStatus" class="outfit-status">악곡 목록을 불러오는 중입니다…</p>
+      <div id="songGallery" class="outfit-gallery" aria-label="악곡 목록"></div>
+    </div>
+  </div>
+
+  <div class="site-dialog" id="siteDialog" role="dialog" aria-modal="true" aria-labelledby="siteDialogTitle">
+    <div class="site-dialog-box">
+      <h2 id="siteDialogTitle">알림</h2>
+      <p class="site-dialog-message" id="siteDialogMessage"></p>
+      <input class="site-dialog-input" id="siteDialogInput" type="text" hidden>
+      <div class="site-dialog-actions" id="siteDialogActions"></div>
+    </div>
+  </div>
+
+  <script>
+    const PART_CATEGORIES = [
+      { key: "face", label: "얼굴", prefixes: ["Face_"] },
+      { key: "voice", label: "보이스", prefixes: ["Voice_"] },
+      { key: "skin", label: "피부", prefixes: ["Skin_"] },
+      { key: "bangs", label: "앞머리", prefixes: ["Fronthair_"] },
+      { key: "backHair", label: "뒷머리", prefixes: ["Backhair_"] },
+      { key: "hairColor", label: "헤어 컬러", prefixes: ["Haircolor_"] },
+      { key: "eyeColor", label: "아이 컬러", prefixes: ["Eyecolor_"] },
+      { key: "messageType", label: "메시 타입", prefixes: ["MeshType_"] },
+      { key: "messageColor", label: "메시 컬러", prefixes: ["Meshcolor_", "MeshColor_", "Haircolor_"] },
+      { key: "hairDecoration", label: "헤어 데코", prefixes: ["Decoration_"] },
+      { key: "makeup", label: "메이크업", prefixes: ["Makeup_", "Make_"] },
+      { key: "onePoint", label: "원 포인트", prefixes: ["Onepoint_", "OnePoint_"] },
+      { key: "jewel", label: "부탁해 주얼", prefixes: ["Jewel_"] },
+      { key: "qr", label: "QR", prefixes: [] }
+    ];
+
+    const PARTS_API = "https://api.github.com/repos/Itthat/aipri-mychara/contents/images/parts";
+    const OUTFITS_API = "https://api.github.com/repos/Itthat/aipri-it-onegai/contents/images/outfits";
+    const selections = {};
+    let catalog = [];
+    let outfitCatalog = [];
+    let activeCategory = null;
+
+    const tableBody = document.getElementById("partsTableBody");
+    const modal = document.getElementById("partsModal");
+    const optionsBox = document.getElementById("partsOptions");
+
+    function renderTable() {
+      tableBody.innerHTML = "";
+      const items = PART_CATEGORIES.map(category => ({ type: "part", category }));
+
+      // 아이 컬러까지 첫째 줄, 메시 타입부터 QR까지 둘째 줄에 7칸씩 배치합니다.
+      for (let rowIndex = 0; rowIndex < 2; rowIndex++) {
+        const row = document.createElement("tr");
+        const rowItems = items.slice(rowIndex * 7, rowIndex * 7 + 7);
+
+        rowItems.forEach(item => {
+          const category = item.category;
+          const cell = document.createElement("td");
+          const label = document.createElement("span");
+          label.className = "part-label";
+          label.textContent = category.label;
+          cell.appendChild(label);
+
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "part-pick";
+          const selected = selections[category.key];
+
+          if (category.key === "qr") {
+            if (selected && selected.image) {
+              const image = document.createElement("img");
+              image.src = selected.image;
+              image.alt = "선택한 QR 이미지";
+              button.appendChild(image);
+            } else {
+              const plus = document.createElement("span");
+              plus.textContent = "＋";
+              button.appendChild(plus);
+            }
+            button.setAttribute("aria-label", "QR 이미지 업로드");
+            button.addEventListener("click", () => document.getElementById("qrUpload").click());
+          } else {
+            // 빈칸 상태는 이미지나 + 표시를 만들지 않아 실제로 아무것도 없는 칸으로 둡니다.
+            if (selected && selected.blank) {
+              button.classList.add("part-pick-blank");
+            } else if (selected && selected.image) {
+              const image = document.createElement("img");
+              image.src = selected.image;
+              image.alt = "";
+              button.appendChild(image);
+            } else {
+              const plus = document.createElement("span");
+              plus.textContent = "＋";
+              button.appendChild(plus);
+            }
+            button.setAttribute("aria-label", category.label + " 선택");
+            button.addEventListener("click", () => openPicker(category));
+          }
+          cell.appendChild(button);
+
+          if (selected) {
+            const clear = document.createElement("button");
+            clear.type = "button";
+            clear.className = "part-clear";
+            clear.textContent = "해제";
+            clear.addEventListener("click", () => {
+              delete selections[category.key];
+              renderTable();
+              saveState();
+            });
+            cell.appendChild(clear);
+          }
+          row.appendChild(cell);
+        });
+        tableBody.appendChild(row);
+      }
+    }
+
+    async function loadCatalog() {
+      optionsBox.innerHTML = '<div class="parts-loading">파츠 목록을 불러오는 중입니다…</div>';
+      try {
+        const response = await fetch(PARTS_API);
+        if (!response.ok) throw new Error("목록 요청 실패");
+        const files = await response.json();
+        catalog = files
+          .filter(file => file.type === "file" && /\.(webp|png|jpe?g)$/i.test(file.name))
+          .map(file => ({
+            file: file.name,
+            image: file.download_url
+          }));
+        if (!catalog.length) throw new Error("이미지 없음");
+        if (activeCategory) showOptions(activeCategory);
+      } catch (error) {
+        optionsBox.innerHTML = '<div class="parts-loading">파츠 목록을 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</div>';
+      }
+    }
+
+    function openPicker(category) {
+      activeCategory = category;
+      document.getElementById("modalTitle").textContent = category.label + " 선택";
+      modal.classList.add("open");
+      showOptions(category);
+    }
+
+    function showOptions(category) {
+      if (!catalog.length) {
+        optionsBox.innerHTML = '<div class="parts-loading">파츠 목록을 불러오는 중입니다…</div>';
+        return;
+      }
+
+      const matching = catalog.filter(item =>
+        category.prefixes.some(prefix => item.file.toLowerCase().startsWith(prefix.toLowerCase()))
+      );
+
+      optionsBox.innerHTML = "";
+      matching.forEach(item => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "parts-option";
+        const image = document.createElement("img");
+        image.loading = "lazy";
+        image.src = item.image;
+        image.alt = "";
+        button.appendChild(image);
+        button.setAttribute("aria-label", "파츠 선택");
+        button.addEventListener("click", () => {
+          selections[category.key] = { image: item.image };
+          renderTable();
+          saveState();
+          closePicker();
+        });
+        optionsBox.appendChild(button);
+      });
+
+      // 빈칸은 글자 없는 타일로, 선택 취소는 글자가 있는 타일로 표시합니다.
+      const blankButton = document.createElement("button");
+      blankButton.type = "button";
+      blankButton.className = "parts-option blank-option";
+      blankButton.setAttribute("aria-label", "빈칸 선택");
+      blankButton.title = "빈칸";
+      blankButton.addEventListener("click", () => {
+        selections[category.key] = { blank: true };
+        renderTable();
+        saveState();
+        closePicker();
+      });
+      optionsBox.appendChild(blankButton);
+
+      const cancelSelectionButton = document.createElement("button");
+      cancelSelectionButton.type = "button";
+      cancelSelectionButton.className = "parts-option parts-option-special";
+      cancelSelectionButton.textContent = "선택 취소";
+      cancelSelectionButton.setAttribute("aria-label", "현재 파츠 선택 취소");
+      cancelSelectionButton.addEventListener("click", () => {
+        delete selections[category.key];
+        renderTable();
+        saveState();
+        closePicker();
+      });
+      optionsBox.appendChild(cancelSelectionButton);
+
+      if (!matching.length) {
+        const message = document.createElement("div");
+        message.className = "parts-loading";
+        message.textContent = "이 종류의 파츠를 찾지 못했습니다.";
+        optionsBox.prepend(message);
+      }
+    }
+
+    function closePicker() {
+      modal.classList.remove("open");
+      activeCategory = null;
+    }
+
+    const outfitGallery = document.getElementById("outfitGallery");
+    const outfitStatus = document.getElementById("outfitStatus");
+    const outfitModalStatus = document.getElementById("outfitModalStatus");
+    const outfitModal = document.getElementById("outfitModal");
+    const outfitPreviewImage = document.getElementById("outfitPreviewImage");
+    const outfitPreviewName = document.getElementById("outfitPreviewName");
+    const outfitPreviewEmpty = document.getElementById("outfitPreviewEmpty");
+
+    function outfitDisplayName(filename) {
+      return filename.replace(/\.(png|jpe?g|webp|gif)$/i, "").replace(/_/g, " ");
+    }
+
+    function renderOutfits() {
+      const selected = selections.outfit;
+      outfitPreviewEmpty.hidden = !!selected;
+      outfitPreviewImage.hidden = !selected;
+      outfitPreviewName.hidden = !selected;
+      if (selected) {
+        outfitPreviewImage.src = selected.image;
+        outfitPreviewName.textContent = selected.name;
+      } else {
+        outfitPreviewImage.removeAttribute("src");
+        outfitPreviewName.textContent = "";
+      }
+      outfitGallery.innerHTML = "";
+      outfitCatalog.forEach(outfit => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "outfit-card" + (selected && selected.image === outfit.image ? " selected" : "");
+        button.setAttribute("aria-pressed", selected && selected.image === outfit.image ? "true" : "false");
+        const image = document.createElement("img");
+        image.loading = "lazy";
+        image.src = outfit.image;
+        image.alt = "";
+        const name = document.createElement("span");
+        name.className = "outfit-card-name";
+        name.textContent = outfit.name;
+        button.append(image, name);
+        button.addEventListener("click", () => {
+          selections.outfit = { image: outfit.image, name: outfit.name };
+          renderOutfits();
+          saveState();
+          outfitModal.classList.remove("open");
+        });
+        outfitGallery.appendChild(button);
+      });
+    }
+
+    async function loadOutfits() {
+      const loadingText = "의상 목록을 불러오는 중입니다…";
+      outfitStatus.textContent = loadingText;
+      outfitModalStatus.textContent = loadingText;
+      try {
+        const response = await fetch(OUTFITS_API);
+        if (!response.ok) throw new Error("의상 목록 요청 실패");
+        const files = await response.json();
+        outfitCatalog = files
+          .filter(file => file.type === "file" && /\.(png|jpe?g|webp|gif)$/i.test(file.name))
+          .map(file => ({ file: file.name, name: outfitDisplayName(file.name), image: file.download_url }))
+          .sort((a, b) => a.name.localeCompare(b.name, "ko"));
+        if (!outfitCatalog.length) {
+          const emptyText = "의상 이미지가 없습니다. images/outfits 폴더를 확인해 주세요.";
+          outfitStatus.textContent = emptyText;
+          outfitModalStatus.textContent = emptyText;
+          return;
+        }
+        outfitStatus.textContent = "코디 선택을 눌러 의상 이미지를 보고 선택할 수 있습니다.";
+        outfitModalStatus.textContent = "사진을 누르면 코디를 선택할 수 있습니다.";
+        renderOutfits();
+      } catch (error) {
+        const errorText = "의상 목록을 불러오지 못했습니다. 잠시 후 새로고침해 주세요.";
+        outfitStatus.textContent = errorText;
+        outfitModalStatus.textContent = errorText;
+      }
+    }
+
+    document.getElementById("openOutfitPicker").addEventListener("click", () => {
+      outfitModal.classList.add("open");
+      renderOutfits();
+    });
+    document.getElementById("closeOutfitModal").addEventListener("click", () => outfitModal.classList.remove("open"));
+    outfitModal.addEventListener("click", event => {
+      if (event.target === outfitModal) outfitModal.classList.remove("open");
+    });
+
+    // 오네가이 아이프리 악곡 목록은 images/songs-onegai 폴더에서 불러옵니다.
+    const SONGS_API = "https://api.github.com/repos/Itthat/aipri-it-onegai/contents/images/songs-onegai";
+    const songGallery = document.getElementById("songGallery");
+    const songStatus = document.getElementById("songStatus");
+    const songModalStatus = document.getElementById("songModalStatus");
+    const songModal = document.getElementById("songModal");
+    const songPreviewImage = document.getElementById("songPreviewImage");
+    const songPreviewName = document.getElementById("songPreviewName");
+    const songPreviewEmpty = document.getElementById("songPreviewEmpty");
+    const friendCardPreview = document.getElementById("friendCardPreview");
+    let friendCardTargetSlot = 0;
+    let songCatalog = [];
+
+    function songDisplayName(filename) {
+      return filename.replace(/\.(png|jpe?g|webp|gif)$/i, "").replace(/_/g, " ");
+    }
+
+    function renderSong() {
+      const selected = selections.song;
+      songPreviewEmpty.hidden = !!selected;
+      songPreviewImage.hidden = !selected;
+      songPreviewName.hidden = !selected;
+      if (selected) {
+        songPreviewImage.src = selected.image;
+        songPreviewName.textContent = selected.name;
+      } else {
+        songPreviewImage.removeAttribute("src");
+        songPreviewName.textContent = "";
+      }
+      songGallery.innerHTML = "";
+      songCatalog.forEach(song => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "outfit-card" + (selected && selected.image === song.image ? " selected" : "");
+        button.setAttribute("aria-pressed", selected && selected.image === song.image ? "true" : "false");
+        const image = document.createElement("img");
+        image.loading = "lazy";
+        image.src = song.image;
+        image.alt = "";
+        const name = document.createElement("span");
+        name.className = "outfit-card-name";
+        name.textContent = song.name;
+        button.append(image, name);
+        button.addEventListener("click", () => {
+          selections.song = { image: song.image, name: song.name };
+          renderSong();
+          saveState();
+          songModal.classList.remove("open");
+        });
+        songGallery.appendChild(button);
+      });
+    }
+
+    async function loadSongs() {
+      const loadingText = "악곡 목록을 불러오는 중입니다…";
+      songStatus.textContent = loadingText;
+      songModalStatus.textContent = loadingText;
+      try {
+        const response = await fetch(SONGS_API);
+        if (!response.ok) throw new Error("악곡 목록 요청 실패");
+        const files = await response.json();
+        songCatalog = files.filter(file => file.type === "file" && /\.(png|jpe?g|webp|gif)$/i.test(file.name))
+          .map(file => ({ name: songDisplayName(file.name), image: file.download_url }))
+          .sort((a, b) => a.name.localeCompare(b.name, "ko"));
+        if (!songCatalog.length) {
+          const message = "악곡 이미지가 없습니다. images/songs-onegai 폴더를 확인해 주세요.";
+          songStatus.textContent = message;
+          songModalStatus.textContent = message;
+          return;
+        }
+        songStatus.textContent = "악곡 선택을 눌러 이미지를 보고 고를 수 있습니다.";
+        songModalStatus.textContent = "이미지를 누르면 악곡을 선택할 수 있습니다.";
+        renderSong();
+      } catch (error) {
+        const message = "악곡 목록을 불러오지 못했습니다. 폴더 이름과 새로고침을 확인해 주세요.";
+        songStatus.textContent = message;
+        songModalStatus.textContent = message;
+      }
+    }
+
+    document.getElementById("openSongPicker").addEventListener("click", () => {
+      songModal.classList.add("open");
+      renderSong();
+    });
+    document.getElementById("closeSongModal").addEventListener("click", () => songModal.classList.remove("open"));
+    songModal.addEventListener("click", event => { if (event.target === songModal) songModal.classList.remove("open"); });
+    document.getElementById("clearSong").addEventListener("click", () => {
+      delete selections.song;
+      renderSong();
+      saveState();
+    });
+
+    function normalizeFriendCards() {
+      // 이전 버전에서 저장한 단일 프렌드카드도 유지합니다.
+      if (!Array.isArray(selections.friendCards)) {
+        selections.friendCards = selections.friendCard && selections.friendCard.image ? [selections.friendCard] : [];
+      }
+      delete selections.friendCard;
+      selections.friendCards = selections.friendCards.slice(0, 3);
+    }
+
+    function renderFriendCard() {
+      normalizeFriendCards();
+      friendCardPreview.innerHTML = "";
+      for (let index = 0; index < 3; index++) {
+        const item = document.createElement("div");
+        item.className = "friend-card-slot";
+        const card = selections.friendCards[index];
+        if (card && card.image) {
+          const image = document.createElement("img");
+          image.src = card.image;
+          image.alt = `프렌드카드 QR ${index + 1}`;
+          item.appendChild(image);
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "friend-card-remove";
+          remove.textContent = "삭제";
+          remove.addEventListener("click", () => {
+            selections.friendCards[index] = null;
+            renderFriendCard();
+            saveState();
+          });
+          const controls = document.createElement("div");
+          controls.className = "friend-card-slot-buttons";
+          controls.appendChild(remove);
+          item.appendChild(controls);
+        } else {
+          const empty = document.createElement("span");
+          empty.className = "friend-card-slot-empty";
+          empty.textContent = `프렌드카드 ${index + 1}`;
+          item.appendChild(empty);
+        }
+        const upload = document.createElement("button");
+        upload.type = "button";
+        upload.className = "friend-card-slot-button";
+        upload.textContent = card && card.image ? "변경" : "업로드";
+        upload.addEventListener("click", () => {
+          friendCardTargetSlot = index;
+          document.getElementById("friendCardUpload").click();
+        });
+        let controls = item.querySelector(".friend-card-slot-buttons");
+        if (!controls) {
+          controls = document.createElement("div");
+          controls.className = "friend-card-slot-buttons";
+          item.appendChild(controls);
+        }
+        controls.appendChild(upload);
+        if (!card || !card.image) {
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "friend-card-remove";
+          remove.textContent = "삭제";
+          remove.disabled = true;
+          controls.appendChild(remove);
+        }
+        friendCardPreview.appendChild(item);
+      }
+    }
+    document.getElementById("friendCardUpload").addEventListener("change", async event => {
+      const file = event.target.files && event.target.files[0];
+      event.target.value = "";
+      if (!file) return;
+      normalizeFriendCards();
+      const readFile = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve({ image: reader.result });
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      try {
+        const card = await readFile(file);
+        selections.friendCards[friendCardTargetSlot] = card;
+        selections.friendCards = selections.friendCards.slice(0, 3);
+        renderFriendCard();
+        saveState();
+      } catch (error) {
+        await siteAlert("이미지를 불러오지 못했습니다. 다른 이미지를 선택해 주세요.");
+      }
+    });
+
+    const DRAFT_KEY = "aipriBusPartsDraft";
+    const LEGACY_KEY = "aipriBusParts";
+    const SAVED_CHARACTERS_KEY = "aipriBusSavedCharacters";
+    const savedCharacterButtons = document.getElementById("savedCharacterButtons");
+    const savedCharacterStatus = document.getElementById("savedCharacterStatus");
+    const siteDialog = document.getElementById("siteDialog");
+    const siteDialogTitle = document.getElementById("siteDialogTitle");
+    const siteDialogMessage = document.getElementById("siteDialogMessage");
+    const siteDialogInput = document.getElementById("siteDialogInput");
+    const siteDialogActions = document.getElementById("siteDialogActions");
+
+    function showSiteDialog({ title = "알림", message = "", confirmText = "확인", cancelText = null, danger = false, input = false, defaultValue = "" }) {
+      return new Promise(resolve => {
+        siteDialogTitle.textContent = title;
+        siteDialogMessage.textContent = message;
+        siteDialogInput.hidden = !input;
+        siteDialogInput.value = defaultValue;
+        siteDialogActions.innerHTML = "";
+        const finish = value => {
+          siteDialog.classList.remove("open");
+          document.removeEventListener("keydown", onKeyDown);
+          resolve(value);
+        };
+        const onKeyDown = event => {
+          if (event.key === "Escape") finish(input ? null : false);
+          if (event.key === "Enter" && input) finish(siteDialogInput.value.trim());
+        };
+        if (cancelText) {
+          const cancel = document.createElement("button");
+          cancel.type = "button";
+          cancel.className = "site-dialog-button";
+          cancel.textContent = cancelText;
+          cancel.addEventListener("click", () => finish(input ? null : false));
+          siteDialogActions.appendChild(cancel);
+        }
+        const accept = document.createElement("button");
+        accept.type = "button";
+        accept.className = "site-dialog-button primary" + (danger ? " danger" : "");
+        accept.textContent = confirmText;
+        accept.addEventListener("click", () => finish(input ? siteDialogInput.value.trim() : true));
+        siteDialogActions.appendChild(accept);
+        siteDialog.classList.add("open");
+        document.addEventListener("keydown", onKeyDown);
+        if (input) siteDialogInput.focus(); else accept.focus();
+      });
+    }
+
+    function siteAlert(message, title = "알림") {
+      return showSiteDialog({ title, message, confirmText: "확인" });
+    }
+
+    function siteConfirm(message, title = "확인") {
+      return showSiteDialog({ title, message, confirmText: "진행", cancelText: "취소" });
+    }
+
+    function getSavedCharacters() {
+      try {
+        const data = JSON.parse(localStorage.getItem(SAVED_CHARACTERS_KEY) || "{}");
+        return data && typeof data === "object" && !Array.isArray(data) ? data : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function refreshSavedCharacterList() {
+      const saved = getSavedCharacters();
+      const names = Object.keys(saved).sort((a, b) => a.localeCompare(b, "ko"));
+      savedCharacterButtons.innerHTML = "";
+      if (!names.length) {
+        savedCharacterStatus.textContent = "저장된 캐릭터는 이 브라우저에 보관됩니다.";
+        return;
+      }
+      savedCharacterStatus.textContent = "불러올 캐릭터를 선택하세요. 캐릭터 이름을 누르면 바로 불러옵니다.";
+      names.forEach(name => {
+        const item = document.createElement("div");
+        item.className = "saved-character-item";
+        const loadButton = document.createElement("button");
+        loadButton.type = "button";
+        loadButton.className = "saved-character-load";
+        loadButton.textContent = name;
+        loadButton.title = name + " 불러오기";
+        loadButton.addEventListener("click", async () => {
+          const currentName = document.getElementById("characterName").value.trim();
+          const hasCurrentWork = currentName || Object.keys(selections).length;
+          if (hasCurrentWork && !(await siteConfirm("현재 편집 중인 내용 대신 ‘" + name + "’을(를) 불러올까요?", "캐릭터 불러오기"))) return;
+          const latest = getSavedCharacters();
+          if (!latest[name]) { refreshSavedCharacterList(); return; }
+          applyCharacterData(latest[name]);
+          savedCharacterStatus.textContent = "‘" + name + "’ 캐릭터를 불러왔습니다.";
+        });
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "saved-character-delete";
+        deleteButton.textContent = "×";
+        deleteButton.setAttribute("aria-label", name + " 삭제");
+        deleteButton.title = "삭제";
+        deleteButton.addEventListener("click", async () => {
+          if (!(await siteConfirm("저장된 ‘" + name + "’ 캐릭터를 삭제할까요?", "캐릭터 삭제"))) return;
+          const latest = getSavedCharacters();
+          delete latest[name];
+          try {
+            localStorage.setItem(SAVED_CHARACTERS_KEY, JSON.stringify(latest));
+            refreshSavedCharacterList();
+            savedCharacterStatus.textContent = "‘" + name + "’ 캐릭터를 삭제했습니다.";
+          } catch (error) {
+            await siteAlert("캐릭터 목록을 업데이트하지 못했습니다.");
+          }
+        });
+        item.append(loadButton, deleteButton);
+        savedCharacterButtons.appendChild(item);
+      });
+    }
+
+    function saveState() {
+      const data = {
+        name: document.getElementById("characterName").value,
+        selections: { ...selections }
+      };
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+      } catch (error) {
+        savedCharacterStatus.textContent = "브라우저 저장 공간이 부족합니다. QR 이미지 크기를 줄여 주세요.";
+      }
+    }
+
+    function applyCharacterData(data) {
+      document.getElementById("characterName").value = data && data.name ? data.name : "";
+      Object.keys(selections).forEach(key => delete selections[key]);
+      if (data && data.selections && typeof data.selections === "object") {
+        Object.assign(selections, data.selections);
+      }
+      normalizeFriendCards();
+      renderTable();
+      renderOutfits();
+      renderSong();
+      renderFriendCard();
+      renderOnegaiQr();
+      saveState();
+    }
+
+    function restoreState() {
+      try {
+        let data = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null");
+        if (!data) {
+          // 이전 버전에서 저장했던 현재 작업이 있으면 임시 작업으로 이어받습니다.
+          data = JSON.parse(localStorage.getItem(LEGACY_KEY) || "null");
+          if (data) localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+        }
+        if (data) applyCharacterData(data);
+        else renderTable();
+      } catch (error) {
+        console.warn("저장된 파츠 정보를 불러오지 못했습니다.", error);
+        renderTable();
+      }
+      refreshSavedCharacterList();
+    }
+
+    document.getElementById("exportPageImage").addEventListener("click", async () => {
+      const button = document.getElementById("exportPageImage");
+      if (typeof window.html2canvas !== "function") {
+        await siteAlert("이미지 내보내기 기능을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.", "내보내기 실패");
+        return;
+      }
+      const target = document.querySelector(".parts-page");
+      const oldLabel = button.textContent;
+      button.disabled = true;
+      button.textContent = "이미지 만드는 중…";
+      try {
+        if (document.fonts && document.fonts.ready) await document.fonts.ready;
+        const canvas = await window.html2canvas(target, {
+          backgroundColor: "#ffffff",
+          scale: 2,
+          width: 1200,
+          windowWidth: 1200,
+          useCORS: true,
+          allowTaint: false,
+          logging: false,
+          scrollX: 0,
+          scrollY: 0,
+          onclone: clonedDocument => {
+            const clonedTarget = clonedDocument.querySelector(".parts-page");
+            clonedTarget.querySelectorAll(".parts-actions, .saved-characters, .parts-hint, .outfit-status, #outfitStatus, #songStatus, .export-actions, .onegai-actions").forEach(element => {
+              element.style.display = "none";
+            });
+            clonedTarget.querySelectorAll("input[type='file']").forEach(element => { element.style.display = "none"; });
+            clonedTarget.style.width = "1200px";
+            clonedTarget.style.minWidth = "1200px";
+            clonedTarget.style.maxWidth = "1200px";
+            clonedTarget.style.padding = "24px";
+            clonedTarget.style.margin = "0";
+            clonedTarget.style.boxSizing = "border-box";
+          }
+        });
+        const name = (document.getElementById("characterName").value.trim() || "아이프리").replace(/[\\/:*?"<>|]/g, "_");
+        const link = document.createElement("a");
+        link.download = name + ".png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      } catch (error) {
+        console.error("이미지 내보내기에 실패했습니다.", error);
+        await siteAlert("이미지를 만들지 못했습니다. 이미지가 모두 표시된 뒤 다시 시도해 주세요.", "내보내기 실패");
+      } finally {
+        button.disabled = false;
+        button.textContent = oldLabel;
+      }
+    });
+    document.getElementById("closeModal").addEventListener("click", closePicker);
+    modal.addEventListener("click", event => {
+      if (event.target === modal) closePicker();
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") closePicker();
+    });
+    document.getElementById("characterName").addEventListener("input", saveState);
+    function renderOnegaiQr() {
+      const box = document.getElementById("onegaiQrPreview");
+      if (!box) return;
+      box.innerHTML = "";
+      if (selections.qr && selections.qr.image) {
+        const image = document.createElement("img");
+        image.src = selections.qr.image;
+        image.alt = "선택한 QR 이미지";
+        box.appendChild(image);
+      } else {
+        box.textContent = "QR 이미지를 올려 주세요.";
+      }
+    }
+    document.getElementById("onegaiQrUploadButton").addEventListener("click", () => document.getElementById("qrUpload").click());
+    document.getElementById("onegaiQrDeleteButton").addEventListener("click", () => { delete selections.qr; renderOnegaiQr(); saveState(); });
+
+    document.getElementById("qrUpload").addEventListener("change", event => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        selections.qr = { image: reader.result };
+        renderTable();
+        renderOnegaiQr();
+        saveState();
+      };
+      reader.readAsDataURL(file);
+      event.target.value = "";
+    });
+    document.getElementById("saveParts").addEventListener("click", async () => {
+      const name = document.getElementById("characterName").value.trim();
+      if (!name) {
+        await siteAlert("먼저 캐릭터 이름을 입력해 주세요.", "캐릭터 저장");
+        document.getElementById("characterName").focus();
+        return;
+      }
+      const saved = getSavedCharacters();
+      const alreadyExists = Object.prototype.hasOwnProperty.call(saved, name);
+      if (alreadyExists && !(await siteConfirm("같은 이름의 캐릭터가 이미 있습니다. 기존 저장 내용을 덮어쓸까요?", "덮어쓰기 확인"))) return;
+      saved[name] = { name, selections: { ...selections }, updatedAt: new Date().toISOString() };
+      try {
+        localStorage.setItem(SAVED_CHARACTERS_KEY, JSON.stringify(saved));
+        saveState();
+        refreshSavedCharacterList();
+        savedCharacterStatus.textContent = "‘" + name + "’ 캐릭터를 저장했습니다.";
+      } catch (error) {
+        await siteAlert("저장 공간이 부족해 캐릭터를 저장하지 못했습니다. QR 이미지 크기를 줄여 주세요.", "저장 실패");
+      }
+    });
+
+    document.getElementById("resetParts").addEventListener("click", async () => {
+      if (!(await siteConfirm("현재 편집 중인 파츠와 QR 이미지를 초기화할까요? 저장된 캐릭터 목록은 삭제되지 않습니다.", "선택 초기화"))) return;
+      Object.keys(selections).forEach(key => delete selections[key]);
+      document.getElementById("characterName").value = "";
+      renderTable();
+      saveState();
+      savedCharacterStatus.textContent = "현재 편집 중인 작업을 초기화했습니다. 저장된 캐릭터는 유지됩니다.";
+    });
+
+    document.getElementById("clearOutfit").addEventListener("click", () => {
+      delete selections.outfit;
+      renderOutfits();
+      saveState();
+    });
+
+    restoreState();
+    renderOnegaiQr();
+    renderFriendCard();
+    loadCatalog();
+    loadOutfits();
+    loadSongs();
+  </script>
+</body>
+</html>
