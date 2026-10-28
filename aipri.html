@@ -873,7 +873,7 @@
         });
         const name = (document.getElementById("characterName").value.trim() || "아이프리").replace(/[\\/:*?"<>|]/g, "_");
         const link = document.createElement("a");
-        link.download = name + ".png";
+        link.download = name + "_버스.png";
         link.href = canvas.toDataURL("image/png");
         link.click();
       } catch (error) {
