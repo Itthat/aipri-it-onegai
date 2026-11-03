@@ -895,6 +895,25 @@
               element.style.display = "none";
             });
             clonedTarget.querySelectorAll("input[type='file']").forEach(element => { element.style.display = "none"; });
+
+            // 내보내기용 복제본에서는 textarea를 일반 텍스트 영역으로 바꿔
+            // 입력한 줄바꿈과 긴 문장이 캔버스에 모두 표시되도록 합니다.
+            const originalMemo = document.getElementById("memo");
+            const clonedMemo = clonedTarget.querySelector("#memo");
+            if (originalMemo && clonedMemo) {
+              const memoText = clonedDocument.createElement("div");
+              memoText.id = "memo";
+              memoText.textContent = originalMemo.value;
+              memoText.style.cssText = [
+                "display:block", "width:100%", "min-height:80px", "height:auto",
+                "box-sizing:border-box", "padding:8px", "border:1px solid #b8dfd6",
+                "border-radius:9px", "background:#fff", "color:#285650",
+                "font:inherit", "font-size:inherit", "line-height:1.6",
+                "white-space:pre-wrap", "overflow-wrap:anywhere", "word-break:break-word"
+              ].join(";");
+              clonedMemo.replaceWith(memoText);
+            }
+
             clonedTarget.style.width = "1200px";
             clonedTarget.style.minWidth = "1200px";
             clonedTarget.style.maxWidth = "1200px";
